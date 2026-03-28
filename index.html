@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+ <!-- =====================================================
+       TEMPORARY LANDING PAGE - under construction
+       ===================================================== -->
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Renovations Underway | Hannah Graham</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        /* Specific overrides for this landing page layout */
+        :root {
+            /* Your custom hexes at low opacity */
+            --bg-base: #FAF4ED;
+            --color-1: rgba(0, 229, 255, 0.25);  /* #00E5FF blue */
+            --color-2: rgba(255, 0, 127, 0.20);  /* #FF007F pink */
+            --color-3: rgba(187, 196, 143, 0.25); /* #BBC48F green */
+            --color-4: rgba(253, 175, 4, 0.15);  /* #FDAF04 yellow */
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: var(--space-md);
+            background-color: var(--bg-base);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* The Custom Gradient Layer with Grain */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            Width: auto%;
+            Height: 40%;
+            background: 
+                radial-gradient(at 10% 10%, var(--color-1) 0px, transparent 40%),
+                radial-gradient(at 50% 5%, var(--color-2) 0px, transparent 60%),
+                radial-gradient(at 90% 15%, var(--color-3) 0px, transparent 50%),
+                radial-gradient(at 80% 60%, var(--color-4) 0px, transparent 60%);
+            filter: url(#grainy); 
+        }
+
+        .status-eyebrow {
+            font-family: var(--sans);
+            font-weight: 400;
+            font-size: 0.72rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .status-eyebrow .status-icon {
+            width: 1.5em;
+            height: 1.5em;
+            object-fit: contain;
+        }
+
+        .main-title {
+            font-family: var(--sans);
+            font-weight: 700;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            text-transform: uppercase;
+            color: var(--dark);
+            margin-bottom: 4rem;
+            letter-spacing: -0.02em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .intro-card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 1000px;
+            aspect-ratio: 16 / 6;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5));
+            background-size: cover;
+            background-position: center;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            padding: 0 10rem;
+            overflow: visible;
+        }
+
+        .intro-card__profile {
+            position: relative;
+            width: 180px;
+            height: auto;
+            background: white;
+            border-radius: 12px;
+            padding: 0px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            margin-right: 3rem;
+        }
+
+        .intro-card__profile img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .profile-icon {
+            position: absolute;
+            top: -40px;
+            left: -50px;
+            width: 85px !important; 
+            height: auto !important;
+            object-fit: shrink;
+	    z-index: 10;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
+        }
+
+        .intro-card__text {
+            color: white;
+            max-width: 500px;
+        }
+
+        .intro-card__eyebrow {
+            font-family: var(--sans);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            margin-bottom: 0.5rem;
+            opacity: 1;
+        }
+
+        .intro-card__headline {
+            font-family: var(--serif);
+            font-size: clamp(1.8rem, 3vw, 2.2rem);
+            letter-spacing: -0.05em;
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+
+        .intro-card__headline span {
+            color: var(--green-light);
+        }
+
+        .intro-card__location {
+            font-family: var(--serif);
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+        }
+
+        @media (max-width: 900px) {
+            .intro-card { 
+                flex-direction: column; 
+                padding: 4rem; 
+                aspect-ratio: auto;
+                text-align: center;
+            }
+            .intro-card__profile { margin-right: 0; margin-bottom: 2rem; width: 140px; height: 140px; }
+        }
+    </style>
+</head>
+<body>
+
+ <!-- =====================================================
+       CURSOR — dot + daisy ring + "read more" pill
+       ===================================================== -->
+
+  <div id="cursor-daisy" aria-hidden="true">
+    <!--
+      Daisy: 10 hot-pink petals (ellipses, 36° apart).
+      White centre circle drawn last — always on top of petals.
+      viewBox padded by 20 on all sides so nothing clips.
+    -->
+    <svg viewBox="-20 -20 140 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g transform="translate(50,50)">
+        <!-- Petals -->
+        <ellipse cx="0" cy="-30" rx="10" ry="20" fill="#FF007F" transform="rotate(0)"   />
+        <ellipse cx="0" cy="-30" rx="10" ry="20" fill="#FF007F" transform="rotate(36)"  />
+        <ellipse cx="0" cy="-30" rx="10" ry="20" fill="#FF007F" transform="rotate(72)"  />
+        <ellipse cx="0" cy="-30" rx="10" ry="20" fill="#FF007F" transform="rotate(108)" />
+        <ellipse cx="0" cy="-30" rx="10" ry="20" fill="#FF007F" transform="rotate(144)" />
+        <ellipse cx="0" cy="-30" rx="10" ry="20" fill="#FF007F" transform="rotate(180)" />
+        <ellipse cx="0" cy="-30" rx="10" ry="20" fill="#FF007F" transform="rotate(216)" />
+        <ellipse cx="0" cy="-30" rx="10" ry="20" fill="#FF007F" transform="rotate(252)" />
+        <ellipse cx="0" cy="-30" rx="10" ry="20" fill="#FF007F" transform="rotate(288)" />
+        <ellipse cx="0" cy="-30" rx="10" ry="20" fill="#FF007F" transform="rotate(324)" />
+        <!-- White centre — always visible, drawn on top -->
+        <circle cx="0" cy="0" r="13" fill="#ffffff" />
+      </g>
+    </svg>
+  </div>
+
+  <div id="cursor-pill" aria-hidden="true">read more</div>
+
+    <div class="status-eyebrow">
+        Returning Soon <img src="assets/media/icons/greenflower-divider.png" alt="" class="status-icon"> April 2026
+    </div>
+
+    <h1 class="main-title">Portfolio Renovations Underway</h1>
+
+    <div class="intro-card" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('assets/media/img/dean-village-edinburgh-2025.jpg');">
+        <div class="intro-card__profile">
+            <img src="assets/media/icons/mapleleaf-gradient-85px.png" alt="" class="profile-icon">
+            <img src="assets/media/img/hannahgraham-headshot-2024.jpg" alt="Photo of the designer Hannah Graham">
+        </div>
+        
+        <div class="intro-card__text">
+            <p class="intro-card__eyebrow">Since you're here</p>
+            <h2 class="intro-card__headline">
+                i’m hannah graham,<br>
+                <span>a graphic and product designer.</span>
+            </h2>
+            <p class="intro-card__location">canadian based in edinburgh, scotland</p>
+        </div>
+    </div>
+
+    <svg style="visibility: hidden; position: absolute; width: 0; height: 0;">
+      <filter id="grainy">
+        <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+        <feColorMatrix type="saturate" values="0"/>
+        <feComponentTransfer>
+          <feFuncA type="linear" slope="0.08"/> 
+        </feComponentTransfer>
+        <feBlend in="SourceGraphic" mode="multiply"/>
+      </filter>
+    </svg>
+
+ <!-- =====================================================
+       JAVASCRIPT
+       ===================================================== -->
+
+  <script>
+
+    /* --- Custom cursor ---------------------------------------- */
+
+    const cursorDaisy = document.getElementById('cursor-daisy');
+    const cursorPill  = document.getElementById('cursor-pill');
+    const daisySvg    = cursorDaisy.querySelector('svg');
+
+    // Twirl system:
+    // - angleAccum: total accumulated rotation (never resets, keeps spinning direction)
+    // - velocity: current spin speed, decays each frame for smooth ease-out
+    // - direction: +1 or -1 based on horizontal mouse movement
+    let lastX = 0, lastY = 0;
+    let angleAccum = 0, velocity = 0, direction = 1;
+    let rafId = null;
+
+    // Each frame: decay velocity slowly so it eases to a stop, not a snap
+    function animateTwirl() {
+      velocity *= 0.94;          // friction — higher = slower decay / longer spin
+      angleAccum += velocity * direction;
+      daisySvg.style.transform = `rotate(${angleAccum}deg)`;
+
+      if (Math.abs(velocity) > 0.05) {
+        rafId = requestAnimationFrame(animateTwirl);
+      } else {
+        velocity = 0;
+        rafId = null;
+      }
+    }
+
+    document.addEventListener('mousemove', ({ clientX: x, clientY: y }) => {
+      // Move cursor elements instantly
+      cursorDaisy.style.left = x + 'px';
+      cursorDaisy.style.top  = y + 'px';
+      cursorPill.style.left  = x + 'px';
+      cursorPill.style.top   = y + 'px';
+
+      const dx = x - lastX;
+      const dy = y - lastY;
+      const speed = Math.sqrt(dx * dx + dy * dy);
+
+      // Direction: moving right/down = clockwise (+1), left/up = counter (-1)
+      if (Math.abs(dx) > Math.abs(dy)) {
+        direction = dx > 0 ? 1 : -1;
+      } else {
+        direction = dy > 0 ? 1 : -1;
+      }
+
+      // Add to velocity (capped so it never gets frantic), scaled down for subtlety
+      velocity = Math.min(velocity + speed * 0.25, 8);
+
+      lastX = x;
+      lastY = y;
+
+      if (!rafId) rafId = requestAnimationFrame(animateTwirl);
+    });
+
+    // Links + buttons: hover state
+    document.querySelectorAll('a, button, .btn').forEach(el => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('is-hovering'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('is-hovering'));
+    });
+
+    // Project cards: show "read more" pill
+    document.querySelectorAll('.project-card').forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        document.body.classList.add('is-on-project', 'is-hovering');
+      });
+      card.addEventListener('mouseleave', () => {
+        document.body.classList.remove('is-on-project', 'is-hovering');
+      });
+    });
+
+    // Press: shrink daisy 10%
+    document.addEventListener('mousedown', () => document.body.classList.add('is-pressing'));
+    document.addEventListener('mouseup',   () => document.body.classList.remove('is-pressing'));
+
+
+    /* --- Scroll reveal ---------------------------------------- */
+
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+
+    /* --- Nav: highlight Work link while scrolled down --------- */
+
+    const workNavLink = document.querySelector('.site-nav__links .is-active');
+
+    window.addEventListener('scroll', () => {
+      workNavLink.classList.toggle('is-active', window.scrollY > 80);
+    });
+
+  </script>
+
+</body>
+</html>
