@@ -1,0 +1,9 @@
+# macOS
+.DS_Store
+
+# Local Playwright MCP scratch output
+.playwright-mcp/
+
+# Ad-hoc debug/comparison screenshots taken during development
+# (all real site images live under assets/, not the project root)
+/*.png

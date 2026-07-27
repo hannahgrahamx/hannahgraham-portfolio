@@ -1,0 +1,1079 @@
+/* ============================================================
+   Hannah Graham Portfolio — Main Stylesheet
+   Shared across all pages (index.html, /pages/*.html)
+   ============================================================ */
+
+/* =====================================================
+   1. TOKENS — colour, type, spacing
+   ===================================================== */
+
+:root {
+  /* Primary */
+  --color-green:        #A2B445;
+  --color-green-light:  #BBC48F;
+  --color-green-dark:   #667326;
+
+  /* Secondary */
+  --color-pink:         #FF007F;
+  --color-pink-light:   #FD8EBD;
+  --color-pink-dark:    #C90064;
+
+  /* Tertiary */
+  --color-yellow:       #FDAF04;
+  --color-yellow-light: #E6C374;
+  --color-blue:         #B5DFED;
+
+  /* Neutral */
+  --color-cream:  #FAF4ED;
+  --color-sand:   #E0D9CF;
+  --color-forest: #3F4D33;
+  --color-dark:   #2C2C2C;
+  --color-grid:   #131412; /* base for "the graph" pattern, see section 3 */
+
+  /* Type */
+  --font-heading: 'Bricolage Grotesque', sans-serif;
+  --font-body:    'Space Grotesk', sans-serif;
+
+  /* Spacing — 12px base unit, per STYLE.md. Defined in rem (not px) so
+     spacing scales along with the user's root font-size/browser zoom,
+     same reasoning as the rem-based type scale below. */
+  --space-1:  0.75rem; /* 12px */
+  --space-2:  1.5rem;  /* 24px */
+  --space-3:  2.25rem; /* 36px */
+  --space-4:  3rem;    /* 48px */
+  --space-5:  3.75rem; /* 60px */
+  --space-6:  4.5rem;  /* 72px */
+  --space-7:  5.25rem; /* 84px */
+  --space-8:  6rem;    /* 96px */
+  --space-9:  6.75rem; /* 108px */
+  --space-10: 7.5rem;  /* 120px */
+  --space-11: 8.25rem; /* 132px */
+
+  --max-width: 1200px;
+}
+
+/* Single source of truth for horizontal alignment. Every section wraps its
+   content in exactly ONE element with this class — never split max-width
+   and padding across an outer/inner pair, or sections drift out of sync
+   with each other at wide viewports. */
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding-left: var(--space-2); /* 24px on mobile, per feedback — was 36px. Restored to 36px at tablet+ */
+  padding-right: var(--space-2);
+}
+
+/* =====================================================
+   2. RESET & BASE
+   ===================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-cream);
+  color: var(--color-dark);
+  cursor: none; /* replaced by custom cursor, see section 4 */
+  overflow-x: hidden;
+  line-height: 1.875; /* Body tier: 30px / 16px, per STYLE.md */
+  letter-spacing: -0.03em; /* Body tier: -3%, per STYLE.md */
+}
+
+@media (hover: none) {
+  /* Touch devices have no real pointer — restore the native cursor/tap targets */
+  body { cursor: auto; }
+}
+
+a { text-decoration: none; color: inherit; }
+img { display: block; max-width: 100%; }
+ul { list-style: none; }
+button { font: inherit; color: inherit; background: none; border: none; cursor: none; }
+
+h1, h2, h3, h4 { font-family: var(--font-heading); font-weight: 700; line-height: 1.1; }
+
+::selection {
+  background-color: rgba(253, 142, 189, 0.3); /* --color-pink-light @ 30%, per STYLE.md — was 100%, made pink text illegible */
+  color: var(--color-pink);
+}
+
+/* Visible focus state for keyboard users — required regardless of the
+   custom cursor hiding the native pointer (WCAG 2.1 AA) */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-pink);
+  outline-offset: 2px; /* per STYLE.md */
+  border-radius: 2px;
+}
+
+/* =====================================================
+   3. "THE GRAPH" — shared grid-pattern background
+   0.5px white stroke, 30px cells, 10% opacity, on --color-grid
+   Used behind: hero, footer, About stat section
+   ===================================================== */
+
+.bg-graph {
+  background-color: var(--color-grid);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.10) 0.5px, transparent 0.5px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.10) 0.5px, transparent 0.5px);
+  background-size: 30px 30px;
+  color: var(--color-cream);
+}
+
+/* Primary background gradient. Rebuilt using a conic-gradient (per
+   assets/css/style.css's .hero__headline, an earlier draft's smooth
+   multi-color sweep) instead of layered radial ellipses — a conic
+   gradient transitions continuously through every color stop by
+   construction, which is what "blended/merging" actually needs; getting
+   that from separate blurred blobs meant constant fighting over overlap
+   and paint order. The layers live on a ::before (not directly on
+   .bg-gradient-primary) so opacity/blur only affect the gradient, not
+   the heading text sitting on top of it. */
+.bg-gradient-primary {
+  position: relative;
+  background: var(--color-cream);
+  overflow: hidden;
+}
+/* Two concerns were tangled onto one element before and that's what
+   caused the hard line to come back at narrower widths: (1) the
+   conic-gradient needs a FIXED height to keep its color-wheel geometry
+   (and therefore which colors are visible) consistent across breakpoints
+   — .about-hero's real height swings from ~133px (tablet) to ~262px
+   (desktop), and conic angles are computed against whatever box they're
+   painted on. But (2) the fade-to-transparent MASK has to complete
+   before the box's real, breakpoint-correct edge, or overflow:hidden
+   clips it mid-fade — a hard line. One fixed-height element can't
+   satisfy both at once (at tablet/mobile widths the fixed height is
+   taller than the real box, so the mask — sized against that same fixed
+   height — hadn't finished fading by the time the real, shorter box
+   clipped it). Splitting them across two elements fixes this: this
+   outer .hero-gradient-layer div is sized to the REAL box (inset:0) and
+   owns the mask + overflow:hidden, so the mask always completes exactly
+   at the real edge, whatever that is at any given breakpoint. */
+.hero-gradient-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0.55;
+  mask-image: radial-gradient(ellipse 70% 100% at 50% 0%, black 0%, black 50%, transparent 95%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 100% at 50% 0%, black 0%, black 50%, transparent 95%);
+  pointer-events: none;
+}
+/* The inner layer owns the FIXED-height conic-gradient + blur — this is
+   what keeps the color-wheel geometry (and therefore which colors show)
+   consistent across breakpoints, cropped by the outer layer's
+   overflow:hidden+mask above rather than needing to manage its own
+   fade-out. */
+.hero-gradient-layer::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: clamp(220px, 20vw, 320px);
+  /* Blur in vw (clamp()'d) so it scales with viewport size — a fixed px
+     blur is proportionally much softer on a big screen than a small one,
+     since the hero box scales with the viewport but a fixed radius
+     doesn't (this was the bug behind "only visible on the big screen"). */
+  filter: blur(clamp(90px, 9vw, 160px));
+  /* Center sits at the top edge, so only the bottom half of the wheel is
+     ever visible — but with the center at the TOP, increasing angle
+     sweeps RIGHT→DOWN→LEFT (90deg=right, 180deg=bottom, 270deg=left), so
+     "increasing angle" is actually right-to-left on screen. Stops below
+     are written in the order the LEFT-EDGE-to-RIGHT-EDGE sweep needs,
+     i.e. decreasing angle from 270deg down to 90deg: cyan (small) → pink
+     (largest) → white/sand → yellow → green (small). Cyan isn't at the
+     very left edge (270deg itself is green, cyan peaks at 258deg) —
+     bookending an edge with cyan reads heavier/cooler; a small green
+     edge instead keeps the light/airy feel. */
+  background: conic-gradient(from 0deg at 50% 0%,
+    #A2B445 90deg,
+    #A2B445 100deg,
+    #FDAF04 110deg,
+    #FDAF04 125deg,
+    #E0D9CF 140deg,
+    #FF007F 150deg,
+    #FF007F 235deg,
+    #00E5FF 255deg,
+    #00E5FF 265deg,
+    #A2B445 270deg,
+    #A2B445 290deg,
+    #A2B445 360deg
+  );
+}
+/* Light/cream tint over the whole gradient to mute/harmonize it — tried
+   as an alternative to just lowering the gradient's own opacity, which
+   risks re-flattening it toward invisible the way an earlier pass
+   already did once. This keeps every color's relative position/
+   visibility intact and instead lightens the whole palette as a group.
+   Lives on .bg-gradient-primary directly (not inside .hero-gradient-layer)
+   so it's a plain flat tint across the whole section, unaffected by the
+   gradient layer's own opacity/mask. */
+.bg-gradient-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-cream);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.about-hero__heading {
+  position: relative;
+  z-index: 1;
+}
+
+/* =====================================================
+   4. CUSTOM CURSOR — flower + context pop-up
+   ===================================================== */
+
+#cursor-flower {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 18px; /* per STYLE.md */
+  height: 18px;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.15s ease, height 0.15s ease, opacity 0.15s ease;
+}
+
+#cursor-flower img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  transition: transform 0.25s ease;
+}
+
+body.is-pressing #cursor-flower {
+  width: 12px; /* per STYLE.md */
+  height: 12px;
+  opacity: 0.6;
+}
+
+/* Context pop-up: appears when hovering anything with [data-cursor-label].
+   Position and entrance-animation are split across two elements on
+   purpose — #cursor-context (outer) only ever gets a `translate` set by
+   JS on every mousemove, with NO transition/animation of any kind, so it
+   cannot ever visibly travel/slide to catch up with the cursor. The pop
+   entrance lives entirely on the inner span, which has no position of
+   its own — that way the two can never interfere with each other. */
+#cursor-context {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9998;
+  pointer-events: none;
+  opacity: 0; /* instant show/hide, not transitioned */
+}
+#cursor-context.is-visible {
+  opacity: 1;
+}
+
+#cursor-context__inner {
+  display: block;
+  max-width: 230px;
+  width: max-content;
+  background: var(--color-dark);
+  color: var(--color-cream);
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  padding: 0.5rem 0.8rem;
+  border-radius: 12px;
+  box-shadow:
+    -3px -3px 0 0 rgba(162, 180, 69, 0.9),
+     3px  3px 0 0 rgba(255, 0, 127, 0.9);
+  transform-origin: center;
+  scale: 0.7; /* pops out from the center on show */
+  transition: scale 0.12s ease-out;
+}
+#cursor-context.is-visible #cursor-context__inner {
+  scale: 1;
+}
+
+/* Custom text-highlight effect (used inline within copy, e.g. hero headline) */
+.text-highlight {
+  background-color: rgba(253, 142, 189, 0.3); /* --color-pink-light @ 30% */
+  color: var(--color-pink);
+  padding: 0 0.15em;
+}
+
+/* =====================================================
+   5. BUTTONS
+   ===================================================== */
+
+.btn {
+  font-family: var(--font-body);
+  font-weight: 500; /* Medium, per STYLE.md */
+  font-size: 0.75rem; /* 12px — lowered to match .link-btn, per feedback; STYLE.md still says 16px, hold off updating until confirmed */
+  letter-spacing: 0.05em; /* 5%, per STYLE.md */
+  text-align: center;
+  text-transform: uppercase;
+  padding: var(--space-1) var(--space-3); /* 12px vertical / 36px horizontal, per STYLE.md */
+  border: 1.5px solid; /* weight 1.5, per STYLE.md */
+  border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  cursor: none;
+  user-select: none;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+/* Icon indicating what the button/link does — every button/link except
+   header nav gets one, on the right/trailing side, per feedback. Sized
+   in em so it tracks whatever text size it's placed next to (16px in a
+   .btn, smaller in footer/mobile-nav links). */
+.icon-copy {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  display: inline-block; /* atomic inline, so ancestor underlines (footer/mobile-nav links) don't draw across it */
+}
+/* Footer/mobile-nav links aren't flex (they rely on text-decoration:underline,
+   which flex would break), so the icon needs manual spacing instead of a
+   flex gap. */
+.site-footer__links .icon-copy,
+.mobile-nav__links-bottom .icon-copy {
+  margin-left: 0.35em;
+  vertical-align: -0.15em;
+}
+
+/* Per STYLE.md: default is outline-only (no fill), hover/clicked both fill
+   solid green-light — a previous pass had this filled by default, citing
+   a since-superseded reference image; STYLE.md is the current source of
+   truth for this variant. */
+.btn--green {
+  border-color: var(--color-green-light); /* per STYLE.md */
+  color: var(--color-forest);
+  background: transparent;
+}
+.btn--green:hover {
+  background: var(--color-green-light);
+  border-color: var(--color-cream);
+  color: var(--color-dark);
+  box-shadow: 5px 5px 0 0 var(--color-green);
+}
+.btn--green:active {
+  background: var(--color-green-light);
+  border-color: var(--color-green);
+  box-shadow: none;
+}
+
+/* "Light" variant for use on dark/olive backgrounds (e.g. CTA bars) —
+   not in STYLE.md. Default state is its own (cream border/text, since
+   .btn--green's forest/green-light default is nearly invisible on this
+   dark bg — measured ~1.7:1 contrast), but hover/clicked match
+   .btn--green exactly, per feedback. */
+.btn--light {
+  border-color: var(--color-green); /* per feedback */
+  color: var(--color-cream);
+  background: transparent;
+}
+.btn--light:hover {
+  background: var(--color-green-light);
+  border-color: var(--color-cream);
+  color: var(--color-dark);
+  box-shadow: 5px 5px 0 0 var(--color-green);
+}
+.btn--light:active {
+  background: var(--color-green-light);
+  border-color: var(--color-green);
+  box-shadow: none;
+}
+
+/* Underlined link-style button, e.g. "MORE ABOUT ME →" / "DOWNLOAD RESUME →" */
+.link-btn {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-green-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: none;
+}
+/* default -> brighter -> darkest, per the "link button" reference image */
+.link-btn:hover { color: var(--color-green); }
+.link-btn:active { color: var(--color-forest); }
+
+.link-btn--light {
+  color: var(--color-cream);
+}
+.link-btn--light:hover { color: var(--color-sand); }
+.link-btn--light:active { color: var(--color-yellow-light); }
+
+/* =====================================================
+   6. HEADER / NAVIGATION
+   ===================================================== */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--color-cream);
+  border-bottom: 1px solid var(--color-sand);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-2); /* equal padding on all 4 sides, matching the side margin at each breakpoint */
+  padding-bottom: var(--space-2);
+}
+
+/* Mobile: icon forms its own column, vertically centered against the
+   stacked name+tagline column beside it. Desktop reverts to a single
+   inline row (natural DOM order) — see the 1024px override below. */
+.site-header__brand {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.5rem;
+}
+.site-header__brand strong,
+.site-header__brand span {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  line-height: 1.1; /* was inheriting body's 1.875 — caused a big gap between the wrapped name/tagline rows on mobile */
+  grid-column: 2;
+}
+.site-header__brand strong {
+  grid-row: 1;
+  font-weight: 700;
+  letter-spacing: -0.0595em; /* -1px at 1.05rem, expressed as em so it scales with the element's own size */
+  color: var(--color-dark);
+}
+.site-header__brand span {
+  grid-row: 2;
+  font-weight: 500;
+  letter-spacing: -0.0893em; /* -1.5px at 1.05rem */
+  color: var(--color-green-dark);
+}
+.site-header__flower {
+  width: 20px;
+  height: 20px;
+  grid-column: 1;
+  grid-row: 1 / 3;
+  align-self: center;
+}
+
+.site-nav__links {
+  display: flex;
+  gap: 2rem;
+}
+
+.site-nav__links a {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.875rem; /* 14px, per STYLE.md (confirmed smaller than the original 16px reference) */
+  letter-spacing: -0.0357em; /* -0.5px at 14px */
+  text-transform: uppercase;
+  color: var(--color-dark);
+  padding: 6px 12px; /* per STYLE.md Nav Links: 12px horizontal / 6px vertical */
+  border-radius: 0; /* squared off, per STYLE.md Nav Links */
+  border: 1px solid transparent;
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.site-nav__links a:hover {
+  border-color: var(--color-green); /* per feedback — no fill on hover, stroke is green not green-dark */
+}
+
+.site-nav__links a:active {
+  background: rgba(162, 180, 69, 0.3); /* --color-green @ 30%, per reference */
+  border-color: var(--color-green-dark);
+}
+
+.site-nav__links a.is-current {
+  color: var(--color-pink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  border-color: transparent;
+}
+
+.hamburger {
+  display: none;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+.hamburger img { width: 100%; height: 100%; }
+
+/* --- Mobile nav panel --- */
+.mobile-nav {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  visibility: hidden;
+  /* Without this, visibility:hidden applies instantly when .is-open is
+     removed, hiding the panel before its slide-out transform transition
+     ever gets to play — looked like a snap-closed instead of a slide
+     back out. Delaying the hide by the same 0.3s as the panel's own
+     transition lets the slide finish first; .is-open below zeroes the
+     delay so opening still shows instantly. */
+  transition: visibility 0s linear 0.3s;
+}
+
+.mobile-nav__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(44, 44, 44, 0.2); /* --color-dark @ 20% */
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.mobile-nav__panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: min(68vw, 360px); /* was 85vw — reference image is 264px of a 390px frame, ~68% */
+  background: var(--color-cream);
+  padding: var(--space-3) var(--space-2);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
+
+.mobile-nav.is-open {
+  visibility: visible;
+  transition-delay: 0s; /* show instantly when opening — only closing delays */
+}
+.mobile-nav.is-open .mobile-nav__backdrop { opacity: 1; }
+.mobile-nav.is-open .mobile-nav__panel { transform: translateX(0); }
+
+.mobile-nav__close {
+  align-self: flex-end;
+  font-size: 1.8rem;
+  line-height: 1;
+  width: 40px;
+  height: 40px;
+}
+
+.mobile-nav__brand {
+  margin: var(--space-3) 0 var(--space-5);
+}
+.mobile-nav__brand a {
+  display: block;
+  margin-left: auto; /* right-aligned with the nav links, per feedback */
+  width: max-content;
+}
+.mobile-nav__brand img {
+  width: 160px;
+  height: auto;
+}
+
+/* All three groups (logo, top links, bottom links) share the same right
+   edge. */
+.mobile-nav__links-top {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+  margin-bottom: auto;
+}
+.mobile-nav__links-top a {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: -0.0368em; /* -0.5px at 0.85rem */
+  text-transform: uppercase;
+  color: var(--color-dark);
+  text-align: right;
+}
+.mobile-nav__links-top a.is-current { color: var(--color-pink); }
+
+.mobile-nav__links-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+}
+.mobile-nav__links-bottom a,
+.mobile-nav__links-bottom button {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.85rem; /* was 0.75rem — matches .mobile-nav__links-top, confirmed same size in the reference */
+  letter-spacing: -0.0368em; /* -0.5px at 0.85rem */
+  text-transform: uppercase;
+  color: var(--color-dark);
+  text-align: right;
+}
+
+/* =====================================================
+   7. FOOTER
+   ===================================================== */
+
+.site-footer {
+  padding: var(--space-3) 0 var(--space-2);
+}
+
+.site-footer__top {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+}
+
+.site-footer__logo {
+  width: 150px;
+  height: auto;
+}
+
+.site-footer__links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.site-footer__links a,
+.site-footer__links button {
+  font-family: var(--font-heading); /* switched to Bricolage, per feedback */
+  font-weight: 700;
+  font-size: 0.75rem; /* 12px — smaller than header nav's 14px, per feedback */
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-green-light);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-align: left;
+}
+.site-footer__links a:hover,
+.site-footer__links button:hover { color: var(--color-pink-light); }
+
+.site-footer__copy {
+  position: relative;
+  padding-top: var(--space-2);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-sand);
+}
+/* Border can't respect padding on its own box (it follows the border-box
+   edge), so it's drawn on a pseudo-element inset by the same left/right
+   padding as the .container class — otherwise the line runs wider than
+   the text content above and below it. */
+.site-footer__copy::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--space-2); /* matches .container's mobile padding — restored to var(--space-3) at tablet+ */
+  right: var(--space-2);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+@media (min-width: 769px) {
+  .site-footer__top {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  .site-footer__links {
+    flex-direction: row;
+    gap: var(--space-3);
+  }
+}
+
+/* =====================================================
+   8. ABOUT PAGE
+   ===================================================== */
+
+/* --- 8a. Hero band --- */
+.about-hero {
+  padding: var(--space-5) 0 var(--space-3);
+}
+
+.about-hero__heading {
+  font-size: 2rem;
+  line-height: 1.15;
+  letter-spacing: -0.0417em; /* Hero tier: -3px at 72px, expressed as em so it scales down (not fixed-tight) at mobile sizes */
+  color: var(--color-dark);
+}
+
+.about-hero__heading .is-pink { color: var(--color-pink); }
+.about-hero__heading .is-green { color: var(--color-green-dark); }
+.about-hero__heading .hero-break { display: none; }
+
+/* --- 8b. Welcome / intro ---
+   Mobile: photo + heading share a row, paragraphs run full-width below.
+   Tablet/desktop: photo spans both rows, heading+paragraphs together
+   beside it (see the grid-template-areas overrides in the responsive
+   section). */
+.about-intro {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-2); /* horizontal: 24px on mobile, restored to 36px at tablet+ */
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  grid-template-areas:
+    "photo heading"
+    "text  text";
+  column-gap: var(--space-2);
+  row-gap: var(--space-3);
+  align-items: start;
+}
+
+.about-intro__photo {
+  grid-area: photo;
+  position: relative;
+  box-shadow:
+    -6px -6px 0 0 var(--color-green),
+     6px  6px 0 0 var(--color-pink);
+}
+.about-intro__photo img { width: 100%; height: auto; display: block; }
+
+.about-intro__heading {
+  grid-area: heading;
+  align-self: center;
+  font-size: 1.625rem; /* H4 tier: 26px, per STYLE.md — confirmed against about-desktop.jpg, not H2 */
+  letter-spacing: -0.0192em; /* -0.5px at 26px, expressed as em per STYLE.md's H4 row */
+}
+/* Forced break after "Welcome," — mobile/tablet only, where the heading
+   column is narrow enough that it wraps anyway; desktop has room to stay
+   on one line so the break is hidden there. */
+.about-intro__heading br { display: inline; }
+
+.about-intro__copy {
+  grid-area: text;
+}
+.about-intro__copy p + p { margin-top: var(--space-2); }
+
+/* --- 8c. Stat grid (dark, "the graph" background) --- */
+.about-stats {
+  padding: var(--space-5) 0;
+}
+
+.about-stats__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* Column gap doubled per feedback (my first pass doubled the wrong
+     axis) — the gutter between the left/right cards, not the row gap.
+     --space-6 (72px) = --space-3 (36px) doubled. */
+  gap: var(--space-5) var(--space-6);
+}
+
+.stat-card {
+  border-left: 3px solid var(--stat-color, var(--color-green));
+  padding-left: var(--space-2);
+}
+.stat-card h3 {
+  /* Heading uses the LIGHT variant of the accent; the border strip keeps
+     the strong/saturated version. Blue has no light variant — same value
+     for both. */
+  color: var(--stat-heading, var(--color-green-light));
+  font-size: 1.3rem; /* 20.8px, sized down to match .cta-bar__label ("Any questions?"), per feedback */
+  letter-spacing: -0.024em; /* -0.5px at 20.8px */
+  margin-bottom: 0.5rem;
+}
+.stat-card p { font-size: 0.9rem; line-height: 1.6; }
+
+.stat-card--green  { --stat-color: var(--color-green);  --stat-heading: var(--color-green-light); }
+.stat-card--pink   { --stat-color: var(--color-pink);   --stat-heading: var(--color-pink-light); }
+.stat-card--yellow { --stat-color: var(--color-yellow); --stat-heading: var(--color-yellow-light); }
+.stat-card--blue   { --stat-color: var(--color-blue);   --stat-heading: var(--color-blue); }
+
+/* --- 8d. CTA bar --- */
+.cta-bar {
+  background: var(--color-green-dark);
+  color: var(--color-cream);
+}
+.cta-bar__inner {
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+.cta-bar__label {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+.cta-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* --- 8e. Outside of working --- */
+.fun-facts {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-2); /* horizontal: 24px on mobile, restored to 36px at tablet+ */
+}
+
+.fun-facts__heading {
+  font-size: 2.5rem; /* H2 tier: 40px, per STYLE.md */
+  letter-spacing: -0.02em; /* -0.8px at 40px, per STYLE.md's H2 row */
+  margin-bottom: var(--space-3);
+}
+
+.fun-facts__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.fun-fact {
+  display: flex;
+  gap: 0.9rem;
+  align-items: center;
+}
+.fun-fact img { width: 32px; height: 32px; flex-shrink: 0; }
+.fun-fact__label {
+  font-size: 0.875rem; /* Labels tier: 14px, per STYLE.md */
+  font-weight: 440;
+  letter-spacing: 0;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--color-green-dark);
+  margin-bottom: 0.2rem;
+}
+.fun-fact__answer {
+  font-size: 0.875rem; /* Body SM tier: 14px, per STYLE.md — closest match, not a named scale row */
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* Mosaic layout — matches the reference mockups exactly per breakpoint,
+   not a generic masonry algorithm. Mobile/tablet: 3 columns, 3 rows.
+   Desktop: 6 columns, 2 rows (paris and blossoms each span the full
+   height of one column; storr spans 2 columns AND both rows, forming a
+   square exactly 4 unit-cells big; muffins/jump and lumineers/cafe each
+   split their own column into two stacked squares).
+   Every unit cell is a true square (aspect-ratio on the whole grid, evenly
+   split across equal-fr tracks) so spanning cells come out exactly 2:1
+   (or 2:2 for storr) in their spanning direction. min-width/min-height: 0
+   on the images is required — grid items default to min-height:auto, so a
+   tall source photo would otherwise force its row taller than the square
+   track instead of being cropped by object-fit, which was causing the
+   distorted/cropped-looking cells. */
+.photo-strip {
+  display: grid;
+  gap: 0; /* flush on mobile, per feedback — restored at tablet+ */
+  aspect-ratio: 1 / 1;
+  /* Flush to the screen edges on mobile — cancels the parent .fun-facts
+     padding. Reset back to inset at tablet+ (see media query below). */
+  margin-left: calc(-1 * var(--space-2));
+  margin-right: calc(-1 * var(--space-2));
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  grid-template-areas:
+    "muffins   jump      blossoms"
+    "storr     storr     cafe"
+    "lumineers paris     paris";
+}
+
+.photo-strip img {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  object-fit: cover;
+  overflow: hidden;
+  cursor: none;
+}
+
+.photo-strip__paris     { grid-area: blossoms; } /* swapped with blossoms, per feedback */
+.photo-strip__muffins   { grid-area: muffins; }
+.photo-strip__jump      { grid-area: jump; }
+.photo-strip__storr     { grid-area: storr; }
+.photo-strip__lumineers { grid-area: lumineers; }
+.photo-strip__cafe      { grid-area: cafe; }
+.photo-strip__blossoms  { grid-area: paris; } /* swapped with paris, per feedback */
+
+/* --- 8f. Contact section --- */
+.about-contact {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-2); /* horizontal: 24px on mobile, restored to 36px at tablet+ */
+  min-height: 62vh; /* slightly reduced on mobile so this section + the CTA bar below both fit in one screen; restored to 70vh at tablet+ */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.about-contact__eyebrow {
+  font-size: 1rem; /* Eyebrow tier: 16px, per STYLE.md */
+  font-weight: 600; /* Eyebrow tier: Space Grotesk Semibold, per STYLE.md */
+  letter-spacing: 0.0625em; /* +1px at 16px, per STYLE.md's Eyebrow row */
+  text-transform: uppercase;
+  color: var(--color-forest);
+  margin-bottom: var(--space-2);
+}
+.about-contact__heading {
+  font-size: clamp(2rem, 7vw, 4.5rem);
+  line-height: 1.1;
+  margin-bottom: var(--space-3);
+}
+.about-contact__heading .is-email,
+.about-contact__heading .is-linkedin {
+  cursor: none;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: opacity 0.18s ease;
+}
+.about-contact__heading .is-email:hover,
+.about-contact__heading .is-linkedin:hover {
+  opacity: 0.85; /* -15%, keeps the same hue instead of swapping to the lighter token (too washed out to read) */
+}
+.about-contact__heading .is-email { color: var(--color-pink); }
+.about-contact__heading .is-linkedin { color: var(--color-green-dark); }
+.about-contact > p:last-child { font-size: 1rem; } /* Body tier: 16px, per STYLE.md */
+
+/* =====================================================
+   9. LIGHTBOX — click a photo-strip image to view it large,
+   at its natural aspect ratio
+   ===================================================== */
+
+#lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  background: rgba(19, 20, 18, 0.85);
+  backdrop-filter: blur(4px);
+}
+#lightbox.is-open { display: flex; }
+#lightbox img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+#lightbox__close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  color: var(--color-cream);
+  cursor: none;
+}
+
+/* =====================================================
+   10. RESPONSIVE — mobile-first
+   Breakpoints: mobile ≤480, tablet ≤768, desktop 1024+
+   ===================================================== */
+
+.site-nav__links { display: none; }
+.hamburger { display: flex; }
+
+/* Mobile: one column for stat cards and the fun-facts grid. */
+.about-stats__grid { grid-template-columns: 1fr; }
+.fun-facts__grid { grid-template-columns: 1fr 1fr; }
+
+@media (min-width: 769px) {
+  /* Tablet and up */
+  .about-intro { grid-template-columns: 220px 1fr; }
+  .fun-facts__grid { grid-template-columns: repeat(3, 1fr); }
+  .about-intro__heading br { display: none; }
+
+  .cta-bar__inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  /* Side margins restored to 36px — the 24px mobile value is too tight
+     once there's more room to work with. */
+  .container,
+  .about-intro,
+  .fun-facts,
+  .about-contact {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+  .about-contact { min-height: 70vh; }
+  .site-footer__copy::before {
+    left: var(--space-3);
+    right: var(--space-3);
+  }
+  .site-header__inner {
+    /* Top/bottom shouldn't scale with the much-larger side margin here —
+       half of it reads right, per feedback. */
+    padding-top: calc(var(--space-3) / 2);
+    padding-bottom: calc(var(--space-3) / 2);
+  }
+
+  /* Photo grid stays inset with its original gap from here up (only
+     mobile gets the flush-edge-to-edge treatment). */
+  .photo-strip {
+    margin-left: 0;
+    margin-right: 0;
+    gap: var(--space-1);
+  }
+}
+
+@media (min-width: 1024px) {
+  /* Desktop */
+  .about-hero__heading { font-size: 4.5rem; }
+  .about-hero__heading .hero-break { display: inline; }
+
+  /* Back to a single inline row: name, icon, tagline (natural DOM order) */
+  .site-header__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .about-intro {
+    grid-template-columns: 260px 1fr;
+    grid-template-areas:
+      "photo heading"
+      "photo text";
+    /* Wider gap than mobile/tablet — measured against about-desktop.jpg,
+       the photo-to-text gutter there is much closer to 72px than the
+       24px that reads fine when the photo is only 110-220px wide. */
+    column-gap: var(--space-6);
+  }
+
+  .about-stats__grid { grid-template-columns: 1fr 1fr; }
+
+  /* Photo mosaic switches from the 3x3 mobile/tablet layout to the
+     6-column x 2-row desktop layout — see about-desktop.jpg. */
+  .photo-strip {
+    aspect-ratio: 3 / 1;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    grid-template-areas:
+      "paris muffins storr storr lumineers blossoms"
+      "paris jump    storr storr cafe      blossoms";
+  }
+
+  .site-nav__links { display: flex; }
+  .hamburger { display: none; }
+
+  /* Links vertically centered against the logo (x-position unchanged —
+     still space-between), per feedback. */
+  .site-footer__top { align-items: center; }
+}
