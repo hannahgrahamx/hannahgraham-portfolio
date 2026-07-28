@@ -5,5 +5,5 @@
 .playwright-mcp/
 
 # Ad-hoc debug/comparison screenshots taken during development
-# (all real site images live under assets/, not the project root)
-/*.png
+# (all real site images live under assets/, not here)
+/dev-screenshots/
