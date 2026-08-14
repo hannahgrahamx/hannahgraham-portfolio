@@ -177,7 +177,7 @@
     lightboxImg.src = '';
   }
 
-  document.querySelectorAll('.photo-strip img').forEach((img) => {
+  document.querySelectorAll('.photo-strip img, .project-gallery img, .realworld-grid img').forEach((img) => {
     img.addEventListener('click', () => openLightbox(img.src, img.alt));
   });
 
@@ -189,5 +189,66 @@
   }
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeLightbox();
+  });
+
+  /* --- Video carousel: arrows + swipe, manual navigation only -------
+     Slides sit side by side in .video-carousel__slides; navigating
+     translates that strip (the CSS transition does the sliding
+     animation) rather than swapping display:none. The active slide's
+     video autoplays muted; every other slide's video is paused. */
+
+  document.querySelectorAll('.video-carousel').forEach((carousel) => {
+    const slides = Array.from(carousel.querySelectorAll('.video-carousel__slide'));
+    const slidesTrack = carousel.querySelector('.video-carousel__slides');
+    const prevBtn = carousel.querySelector('.video-carousel__arrow--prev');
+    const nextBtn = carousel.querySelector('.video-carousel__arrow--next');
+    const dots = Array.from(carousel.querySelectorAll('.video-carousel__dot'));
+    const track = carousel.querySelector('.video-carousel__track');
+    let index = slides.findIndex((s) => s.classList.contains('is-active'));
+    if (index < 0) index = 0;
+
+    function render() {
+      slides.forEach((s, i) => {
+        s.classList.toggle('is-active', i === index);
+        const video = s.querySelector('video');
+        if (!video) return;
+        if (i === index) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      });
+      dots.forEach((d, i) => {
+        d.classList.toggle('is-active', i === index);
+        d.setAttribute('aria-selected', i === index ? 'true' : 'false');
+      });
+      if (slidesTrack) slidesTrack.style.transform = `translateX(-${index * 100}%)`;
+    }
+
+    function goTo(newIndex) {
+      index = (newIndex + slides.length) % slides.length;
+      render();
+    }
+
+    render();
+
+    if (prevBtn) prevBtn.addEventListener('click', () => goTo(index - 1));
+    if (nextBtn) nextBtn.addEventListener('click', () => goTo(index + 1));
+    dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
+
+    if (track) {
+      let touchStartX = 0;
+
+      track.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+      }, { passive: true });
+
+      track.addEventListener('touchend', (e) => {
+        const deltaX = e.changedTouches[0].clientX - touchStartX;
+        const SWIPE_THRESHOLD = 40;
+        if (deltaX > SWIPE_THRESHOLD) goTo(index - 1);
+        else if (deltaX < -SWIPE_THRESHOLD) goTo(index + 1);
+      }, { passive: true });
+    }
   });
 })();

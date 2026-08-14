@@ -8,6 +8,8 @@
 | Body/regular | Space Grotesk |
 Both are Google Fonts — load via `<link>` CDN tag. No local files, no npm.
 
+**Disregard "Special Gothic Regular":** an old font specimen (`80c0f054-b37e-43d1-90ce-2ab85f7e0eee.png`) showed this alongside Bricolage Grotesque Bold — confirmed by the user to be a leftover from an earlier, since-abandoned option, not part of the design system. Bricolage Grotesque + Space Grotesk are the only two fonts in use.
+
 ## Typography Scale
 | Style | Size | Weight/Font | Letter spacing | Line height |
 |---|---|---|---|---|
@@ -66,7 +68,7 @@ Applied to hero heading text, three stacked layers:
 **Verify against:** `portfolio-website-PRD/Screenshot_2026-07-26_at_6.10.54_PM.png` and `..._6.10.33_PM.png` — open these directly, don't infer from this description alone.
 
 ## Primary Background Gradient — LOCKED IN
-**Technique: a `conic-gradient` on a nested layer, not layered radial circles.** Several early passes tried building this from separately-positioned blurred ellipses/circles (which is how the original PRD construction file — `..._6.19.19_PM.png` — was actually built in Figma), but that approach kept fighting itself: paint order, per-shape overlap math, and per-breakpoint blur tuning all needed constant rework, and it never read as genuinely *blended* — always more like several distinct soft blobs sitting next to each other. A conic-gradient transitions continuously through every color stop by construction, which is what "blended/merging" actually needed. The color sequence/technique (a smooth multi-stop sweep, softened afterward) is adapted from `assets/css/style.css`'s `.hero__headline` — an earlier design draft not otherwise used on this page, but which happened to already have a soft multi-color conic sweep worth reusing here. This whole gradient is unique to the About/home hero — it does not recur on the individual project-page mockups (myhealthnb-launch, mental-health-awareness, sexual-health-awareness), which each use their own project-specific accent colors instead.
+**Technique: a `conic-gradient` on a nested layer, not layered radial circles.** Several early passes tried building this from separately-positioned blurred ellipses/circles (which is how the original PRD construction file — `..._6.19.19_PM.png` — was actually built in Figma), but that approach kept fighting itself: paint order, per-shape overlap math, and per-breakpoint blur tuning all needed constant rework, and it never read as genuinely *blended* — always more like several distinct soft blobs sitting next to each other. A conic-gradient transitions continuously through every color stop by construction, which is what "blended/merging" actually needed. The color sequence/technique (a smooth multi-stop sweep, softened afterward) is adapted from `assets/css/style.css`'s `.hero__headline` — an earlier design draft not otherwise used on this page, but which happened to already have a soft multi-color conic sweep worth reusing here. **This gradient is shared site-wide**: every project page (mental-health-campaign, myhealthnb-launch, breastfeeding-guide, sexual-health-campaign) uses this identical `.bg-gradient-primary`/`.hero-gradient-layer` background on its hero, same as About — confirmed by the user; an earlier draft of this note incorrectly said project pages used their own per-project accent colors instead, which is wrong.
 
 **Markup:** a dedicated `<div class="hero-gradient-layer" aria-hidden="true"></div>` as the first child of `.about-hero` (not a pseudo-element) — see why below.
 

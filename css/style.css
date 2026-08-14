@@ -48,6 +48,7 @@
   --space-9:  6.75rem; /* 108px */
   --space-10: 7.5rem;  /* 120px */
   --space-11: 8.25rem; /* 132px */
+  --space-12: 9rem;    /* 144px — extends past STYLE.md's documented 12-132px scale, added per explicit feedback */
 
   --max-width: 1200px;
 }
@@ -714,6 +715,7 @@ body.is-pressing #cursor-flower {
 .about-hero__heading .is-pink { color: var(--color-pink); }
 .about-hero__heading .is-green { color: var(--color-green-dark); }
 .about-hero__heading .hero-break { display: none; }
+.project-hero-break { display: none; } /* shown at desktop only, see media query — mobile wraps naturally */
 
 /* --- 8b. Welcome / intro ---
    Mobile: photo + heading share a row, paragraphs run full-width below.
@@ -944,7 +946,637 @@ body.is-pressing #cursor-flower {
 .about-contact > p:last-child { font-size: 1rem; } /* Body tier: 16px, per STYLE.md */
 
 /* =====================================================
-   9. LIGHTBOX — click a photo-strip image to view it large,
+   9. PROJECT PAGE TEMPLATE
+   Shared across all individual project pages (sexual-health-campaign,
+   mental-health-campaign, myhealthnb-launch, breastfeeding-guide) — built
+   once here on sexual-health-campaign.html, meant to be copy-and-fill for
+   the rest per CLAUDE.md's "share a common template" instruction. Generic
+   class names on purpose, not page-specific ones.
+   ===================================================== */
+
+/* --- 9a. Eyebrow (section label) ---
+   Reused for the hero's category label and each body section's
+   OVERVIEW/OUTCOME/APPROACH-style label. The icon variant prepends the
+   same pink flower mark used elsewhere on the site (header brand, cursor)
+   — per the reference, OVERVIEW/OUTCOME/APPROACH get the icon but REAL
+   WORLD CONDITIONS doesn't, so it's an opt-in modifier, not the default. */
+.project-eyebrow {
+  font-size: 1rem; /* Eyebrow tier: 16px, per STYLE.md */
+  font-weight: 600;
+  /* Inheriting body's 1.875 line-height gave this a lot of invisible
+     leading above/below the glyphs (30px line box around 16px text) —
+     that's what read as "not flush" against an adjacent image's hard
+     edge, even though the box itself was already top-aligned. */
+  line-height: 1.2;
+  letter-spacing: 0.0625em; /* +1px at 16px */
+  text-transform: uppercase;
+  color: var(--color-green-dark);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: var(--space-2);
+}
+.project-eyebrow--icon::before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  background: url('/assets/global/flower-pink.svg') center / contain no-repeat;
+}
+
+/* --- 9b. Hero --- */
+.project-hero {
+  /* Fills the viewport (100dvh, falling back to 100vh) and centers its
+     content vertically via flex — content stays left-aligned since flex
+     only affects the cross-axis position of the block, not its own
+     text-align. Padding stays symmetric (not the usual "next section
+     owns the gap" pattern) because the generous whitespace above/below
+     the centered content already comes from the vh-vs-content-height
+     difference; padding here is just a floor for short/landscape
+     viewports where content nearly fills the box. */
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--space-5) 0;
+}
+.project-hero__inner {
+  position: relative;
+  z-index: 1;
+}
+.project-hero__heading {
+  /* Hero tier, per feedback — same scale as .about-hero__heading, not
+     Heading 1. Base is mobile-sized; desktop override lives in the
+     1024px+ media query alongside .about-hero__heading's. */
+  font-size: 2rem;
+  line-height: 1.15;
+  letter-spacing: -0.0417em; /* Hero tier: -3px at 72px, expressed as em off the desktop size */
+  color: var(--color-dark);
+  margin-bottom: var(--space-2);
+}
+.project-hero__tagline {
+  font-size: 1.25rem; /* Body LG tier: 20px, per STYLE.md */
+  line-height: 1.4;
+  max-width: 640px;
+}
+
+/* --- 9c. Meta row (ROLE / COMPANY / TOOLS / YEAR) --- */
+.project-meta {
+  margin-top: var(--space-6);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+.project-meta__item {
+  padding-top: var(--space-1);
+  border-top: 1px solid var(--color-sand);
+}
+.project-meta__item dt {
+  font-size: 0.875rem; /* Labels tier: 14px */
+  font-weight: 440;
+  text-transform: uppercase;
+  color: var(--color-dark);
+  margin-bottom: 0.35rem;
+}
+.project-meta__item dd {
+  font-size: 0.875rem;
+  font-weight: 440;
+  text-transform: uppercase;
+  color: var(--color-green-dark);
+}
+
+/* --- 9d. Generic image gallery ---
+   No object-fit/aspect-ratio cropping — every image here was sized
+   intentionally, so it renders at its own natural aspect ratio, full
+   image visible, per feedback. align-items:start stops grid's default
+   stretch from forcing a shared row height (which would otherwise crop
+   shorter/taller images against their neighbours). */
+.project-gallery {
+  display: grid;
+  align-items: start;
+  gap: var(--space-1);
+  margin: var(--space-4) 0;
+}
+.project-gallery img {
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: none;
+}
+.project-gallery--pair { grid-template-columns: 1fr 1fr; }
+.project-gallery--trio { grid-template-columns: 1fr; }
+/* The last gallery before a true section break (currently: digital ads,
+   right before the closing CTA) needs its own trailing margin zeroed —
+   the CTA's padding-top owns that gap instead, per the spacing standard
+   on .project-section. Its margin-top stays at the normal 48px "keep
+   together" rhythm — the bigger --space-12 gap belongs at the OUTER edges
+   of this whole three-gallery group (before the first one, after the
+   last one), not between the galleries themselves. See
+   .project-gallery--first below for the entering side. */
+.project-gallery--last { margin-bottom: 0; }
+
+/* The first gallery in Approach's three-gallery group needs the full
+   --space-12 gap above it (this is where the group visually starts,
+   coming off the heading/list copy) instead of the default 48px — per
+   feedback, the bigger gap belongs at the outer edges of the group only,
+   with the 48px rhythm unchanged between the three galleries themselves. */
+.project-gallery--first { margin-top: var(--space-12); }
+
+/* Cover gallery: mobile keeps the bespoke mosaic (posters full-width on
+   top, socials+bus split below) — the "stay in one row" feedback was
+   specifically for tablet/desktop, not mobile, per follow-up
+   clarification. Row layout kicks in at 769px+ (see media query). */
+.project-gallery--cover {
+  /* No margin of its own — sits inside the .project-block wrapper, which
+     owns the section-start gap via padding-top instead (see the spacing
+     standard on .project-section). A margin here would add on top of
+     that, not replace it. */
+  margin: 0;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "posters posters"
+    "bus socials";
+}
+.project-gallery--cover__socials { grid-area: socials; }
+.project-gallery--cover__bus     { grid-area: bus; }
+.project-gallery--cover__posters { grid-area: posters; }
+
+/* --- 9e. Section wrapper (Overview / Outcome / Real World / Approach) --- */
+.project-section {
+  /* top/bottom only — this element also carries .container in markup,
+     and a shorthand `padding: X 0` here would silently zero out
+     .container's own left/right padding (later in the cascade wins),
+     which is exactly what was pushing every eyebrow/heading flush to
+     the viewport edge on mobile. */
+  /*
+     SECTION-SPACING STANDARD (project pages):
+     Every true topic-to-topic break gets exactly --space-12 (144px), and
+     that gap is owned by ONE side only — the entering section's own
+     padding-top. The preceding element contributes 0 on its own bottom
+     edge for this purpose. This is deliberate: padding never collapses
+     the way adjacent margins do, so as long as exactly one side
+     declares the real value and the other is 0, the total is always
+     exactly 144px, never 144+something. Never split a section gap across
+     both sides' padding, and never use margin for it — margin/padding
+     boundaries stacking (or two independent margins colliding) is what
+     produced the uneven 48/60/0 mix and the double-spacing bugs found
+     this session (e.g. .project-gallery-band, the heading+paragraph
+     margin-collapse bug).
+
+     Content that belongs together *within* one topic (e.g. Approach's
+     heading+list and its own supporting galleries) intentionally stays
+     OFF this standard and uses the smaller, already-consistent 48px
+     rhythm from .project-gallery's own margin instead — that's a
+     separate, tighter tier by design, not an oversight.
+
+     .project-block (below) is the equivalent for bare, non-.project-section
+     wrappers (image-only blocks like the cover gallery and the Real
+     World Conditions grid) that also mark a true section start. */
+  padding-top: var(--space-12);
+  padding-bottom: 0;
+}
+
+/* Exception to the standard above: the video carousel that follows this
+   section has its own dark/graph-textured background, so if IT owned the
+   entering gap (its usual padding-top), that gap would be painted dark —
+   it'd read as more dark space inside the carousel, not as an actual gap
+   between the two sections. The gap needs to be cream, so Overview (the
+   cream section) owns it instead, on its OUTGOING side — the one
+   deliberate exception to "entering side always owns it" on this page,
+   same category as the carousel's own fixed-height exception below. */
+.project-section--overview {
+  /* Second exception: the cover gallery right above this section and
+     Overview's own intro copy read as one group (the gallery is what
+     Overview is describing), not two separate topics — so the entering
+     side uses the tighter 48px "keep together" rhythm instead of the
+     standard gap, per feedback. The outgoing side (below) keeps the
+     standard/exception gap into the carousel as normal. */
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-12);
+}
+
+/* Section-start padding for bare (non-.project-section) content blocks —
+   see the standard documented on .project-section above. */
+.project-block {
+  padding-top: var(--space-12);
+}
+.project-section__copy p + p {
+  margin-top: var(--space-2);
+}
+.project-section__heading {
+  font-size: 1.625rem; /* H4 tier: 26px — matches About's heading treatment for section titles */
+  letter-spacing: -0.0192em;
+  margin-bottom: var(--space-1); /* 12px, reduced from --space-2/24px per feedback (Approach's heading-to-body gap) */
+}
+
+/* Mobile/tablet only: the section's own intro paragraph(s) — direct
+   children of .project-section__copy — sit indented ~48px past the
+   container edge, while the eyebrow label and any heading stay flush at
+   the edge, per the mobile reference. The child combinator (>) is
+   deliberate: it's what keeps this from also indenting paragraphs nested
+   deeper inside .project-outcome__stats, .project-quote, or
+   .project-approach__list (their own descriptive <p> tags) — those
+   should NOT get this indent at all, per feedback, since it broke their
+   own internal number/heading/paragraph alignment. Cancelled at tablet+
+   (769px) once the grid's own 220px eyebrow column provides the offset
+   instead (see media query, selector kept identical there so specificity
+   matches and the override actually wins). */
+.project-section__copy > p:not(.project-eyebrow) {
+  padding-left: 3rem; /* ~48px */
+}
+/* Exception: a paragraph immediately following the section's own heading
+   (e.g. Approach's "Make them do a double take.") sits flush with that
+   heading's left edge instead of getting the extra indent — the indent
+   is only meant for copy that follows the eyebrow alone, with no heading
+   in between (Overview/Outcome's intro paragraphs). Selector specificity
+   matches the base rule above (2 class-level selectors + 1 type) so this
+   correctly wins by source order rather than needing !important. */
+.project-section__copy > .project-section__heading + p {
+  padding-left: 0;
+}
+
+/* Real World Conditions: a dedicated 2-column x 2-row grid (not the
+   shared eyebrow-column .project-section pattern — this section's layout
+   is genuinely different, not a variant of it). Top-left is the copy,
+   top-right is the winter-photo pair (itself split 50/50), bottom-left
+   and bottom-right are the two colour-block bus images. One uniform gap
+   in both directions — matching the winter-photo pair's own internal
+   gap (--space-1/12px) so the whole 2x2 block, including the nested
+   split, reads as a single consistent mosaic. Mobile stacks all four
+   pieces in one column; the 2x2 arrangement only applies at tablet+. */
+.realworld-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-1);
+  /* No margin of its own — same reasoning as .project-gallery--cover
+     above: its .project-block wrapper owns the section-start gap. */
+  margin: 0;
+}
+.realworld-grid__winter {
+  margin: 0; /* cancel .project-gallery's own margin — the grid's own gap handles spacing here */
+}
+/* Tighter heading-to-paragraph gap than the shared .project-section__heading
+   default (--space-2/24px) — this copy block needs to fit inside the row
+   height set by the winter-photo pair beside it, per feedback. Scoped to
+   this section only, not a global change to .project-section__heading. */
+.realworld-grid__copy .project-section__heading {
+  margin-bottom: var(--space-1);
+}
+.realworld-grid__busfr,
+.realworld-grid__busen {
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: none;
+}
+
+/* --- 9f. Outcome stats --- */
+.project-outcome__stats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+  margin-top: var(--space-4); /* 48px, increased from --space-3/36px per feedback */
+  /* Left-only (not centered) so this lines up with the indented copy
+     paragraph above it on mobile/tablet, per feedback — reset at 769px+
+     alongside the general paragraph indent, once the grid column split
+     provides that offset instead. */
+  margin-left: 3rem;
+}
+/* Side-by-side from 426px up — a deliberately custom breakpoint (not one
+   of the site's standard mobile/tablet/desktop ones) per feedback,
+   specific to this component. */
+@media (min-width: 426px) {
+  .project-outcome__stats {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.project-outcome__stat {
+  border-left: 3px solid var(--stat-color, var(--color-green));
+  padding-left: var(--space-2);
+}
+.project-outcome__stat h3 {
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+  color: var(--stat-color, var(--color-green));
+  margin-bottom: 0.25rem;
+}
+.project-outcome__stat p { font-size: 0.9rem; }
+.project-outcome__stat--green { --stat-color: var(--color-green-dark); }
+.project-outcome__stat--pink  { --stat-color: var(--color-pink); }
+
+/* --- 9g. Quote card ---
+   Same offset-shadow language as .about-intro__photo (green top-left,
+   pink bottom-right) rather than a new visual idea. */
+.project-quote {
+  background: var(--color-sand);
+  padding: var(--space-3);
+  margin-top: var(--space-5); /* 60px, increased from --space-4/48px per feedback */
+  /* Left-only, matching .project-outcome__stats — lines up with the
+     indented copy paragraph above it on mobile/tablet, per feedback.
+     Reset at 769px+ alongside the same paragraph indent. */
+  margin-left: 3rem;
+  box-shadow:
+    -6px -6px 0 0 var(--color-green),
+     6px  6px 0 0 var(--color-pink);
+}
+.project-quote p {
+  font-size: 1.25rem;
+  line-height: 1.4;
+  color: var(--color-dark);
+}
+
+/* --- 9h. Approach numbered list --- */
+.project-approach__list {
+  margin-top: var(--space-3);
+}
+.project-approach__list li {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: 1px dashed var(--color-sand);
+}
+.project-approach__list li:first-child { padding-top: 0; }
+.project-approach__number {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-pink);
+}
+.project-approach__list h3 {
+  font-size: 1.3rem;
+  letter-spacing: -0.024em;
+  margin-bottom: 0.5rem;
+}
+.project-approach__list p { font-size: 0.9rem; line-height: 1.6; }
+.project-approach__list a {
+  color: var(--color-green-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: none;
+}
+.project-approach__list a:hover { color: var(--color-green); }
+
+/* --- 9i. Full-bleed sand band for the palette/pattern/working-file gallery --- */
+.project-gallery-band {
+  background: var(--color-sand);
+  padding: var(--space-4) 0;
+  margin: var(--space-4) 0;
+}
+.project-gallery-band .project-gallery { margin: 0; }
+
+/* --- 9j. Video carousel ---
+   Spans the full viewport height per feedback (100dvh — adjusts to
+   whatever device it's rendered on, falling back to 100vh in browsers
+   that don't support dvh). Slides sit side by side in
+   .video-carousel__slides and the whole strip translates on navigation
+   (300ms ease-in-out, the "larger movements" timing per STYLE.md's
+   Animation Timing section — same class of transition as the mobile-nav
+   slide-in), rather than swapping display:none, so the sliding motion is
+   an actual animation instead of a hard cut.
+
+   Layout is a grid (not flex) so the arrows/dots can be freely
+   repositioned per breakpoint via grid-template-areas without touching
+   DOM order: mobile stacks the track on top with prev/dots/next below it
+   (full width for the video); desktop flanks the track with the arrows,
+   dots centered underneath, matching the original two-arrow layout. */
+.video-carousel {
+  /* No forced full-screen height on mobile — the video's 4:5 portrait
+     aspect ratio is width-bound at narrow viewports (e.g. 390px wide
+     renders ~487px tall), well short of a full 100dvh mobile screen.
+     Forcing the section to 100dvh anyway just created a large unavoidable
+     gap above/below the video (letterboxing) that grew — not shrank —
+     when other spacing was tightened, since it was never really "margin"
+     controlling it, it was leftover space from the height/aspect
+     mismatch. Letting the section size to its own content on mobile
+     removes that gap outright. Full-viewport immersion is restored at
+     tablet+ (see media query), where a wider viewport plus a
+     side-by-side arrow layout make the video comfortably height-bound
+     instead, so the same forced-height technique doesn't create the same
+     problem there. */
+  /* No padding on either side — this section is dark/graph-textured, so
+     any padding here would just be more dark space, not a visible gap
+     (see .project-section--overview's padding-bottom above for the top
+     boundary, and Outcome's own padding-top for the bottom one — both
+     cream sections own their side of the gap for exactly this reason).
+     align-items:center below still centers the video block within the
+     FULL box height, so removing this padding doesn't lose the internal
+     breathing room above/below the video — that was already coming from
+     the centering, not the padding. */
+  padding: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+/* Mobile only: the section isn't forced to 100dvh here (see comment
+   above), so it sizes to its own content — padding-bottom here adds
+   real, visible dark space after the arrows/dots row rather than
+   fighting the tablet+ centering math. Per feedback, the pagination row
+   was sitting right at the section's bottom edge. */
+@media (max-width: 768px) {
+  .video-carousel {
+    padding-bottom: var(--space-2);
+  }
+}
+.video-carousel__viewport {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  /* auto rows + align-content:center — .video-carousel__viewport has a
+     definite height:100% (matching the section's forced 100dvh), and
+     grid's align-content defaults to a stretch-like behaviour that
+     proportionally inflates "auto" tracks to fill a definite-height
+     container. That's what kept the caption-to-pagination gap wide even
+     after switching off the 1fr row: the auto row was still being
+     stretched taller than its actual content needed. align-content:center
+     stops the stretching (both rows sit at their real content height)
+     while still centering the whole track+controls block vertically in
+     the section, so the video doesn't shift to hug the top — any true
+     leftover viewport height splits evenly above/below the whole block
+     instead of inflating the row itself. */
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "track track track"
+    "prev  dots  next";
+  row-gap: 0.5rem; /* 8px — tighter than --space-1, per feedback ("again reduce") */
+  align-items: center;
+  align-content: center;
+}
+.video-carousel__arrow {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  color: var(--color-green-light);
+  cursor: none;
+  transition: color 0.18s ease;
+}
+.video-carousel__arrow svg { width: 100%; height: 100%; }
+.video-carousel__arrow:hover { color: var(--color-cream); }
+.video-carousel__arrow--prev { grid-area: prev; }
+.video-carousel__arrow--next { grid-area: next; }
+
+.video-carousel__track {
+  grid-area: track;
+  min-width: 0;
+  /* No height:100% here (or on .video-carousel__slides/__slide below) —
+     that chain of percentage heights, each resolving against an
+     ancestor whose own height depended on ITS content, was what kept
+     forcing this row to stretch to the full grid-row size (836px) even
+     after switching the row itself to "auto" and trying align-content —
+     neither actually broke the cycle. Letting track/slides/slide size
+     purely by their own content (the video + caption) is what finally
+     makes the row height match its real content, so row-gap is the only
+     space between the caption and the pagination below it. */
+  overflow: hidden;
+  /* Full-bleed on mobile/tablet, per feedback — the video should fill as
+     much width (and therefore height, at its fixed aspect ratio) as
+     possible, cancelling .container's side padding the same way
+     .photo-strip breaks out on About. Reset at desktop, where the
+     reference shows the video centered with room for the arrows either
+     side, not edge-to-edge. */
+  margin-left: calc(-1 * var(--space-2));
+  margin-right: calc(-1 * var(--space-2));
+}
+.video-carousel__slides {
+  display: flex;
+  transition: transform 0.3s ease-in-out;
+}
+.video-carousel__slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+/* No object-fit crop — the video's own aspect ratio (4:5) is shown in
+   full. max-height is a direct viewport-relative unit (not a percentage
+   of an ancestor) so it stays robust regardless of how track/slide end
+   up sized — mainly a safety cap; max-width:100% is what actually binds
+   it in every viewport tested so far. */
+.video-carousel__slide video {
+  display: block;
+  max-height: 70vh;
+  max-height: 70dvh;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  background: var(--color-dark);
+}
+.video-carousel__caption {
+  max-width: 340px;
+  margin: var(--space-2) auto 0;
+  font-size: 0.75rem;
+  font-weight: 440;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-sand);
+  text-align: left;
+}
+
+/* Dot pagination: filled = current slide, empty = the rest */
+.video-carousel__dots {
+  grid-area: dots;
+  /* Vertically centered with the arrows (grid's shared align-items:center
+     applies here by default) — per feedback, this takes priority over
+     the tighter caption-gap the previous align-self:start version gave,
+     since the arrows and dots share the same 32px-tall controls row and
+     should read as one aligned row, not offset from each other. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+}
+.video-carousel__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-green-light);
+  background: transparent;
+  cursor: none;
+  padding: 0;
+  transition: background 0.18s ease;
+}
+.video-carousel__dot.is-active {
+  background: var(--color-green-light);
+}
+
+/* --- 9k. Closing project CTA --- */
+.project-cta {
+  /* border-top sits at this box's own top edge, painted BEFORE padding —
+     so padding-top alone (the usual section-gap pattern) put the real
+     gap between the line and the heading, leaving the line itself flush
+     against the gallery images above it with no visible space at all.
+     margin-top pushes the line itself away from the images (collapses
+     against the gallery's own margin-bottom:0). The whole CTA block —
+     entering gap, internal padding — reads as its own smaller tier, not
+     tied to the page's standard section-break gap: all three (margin-top,
+     padding-top, padding-bottom) are --space-4 per feedback, down from
+     --space-12 on the margin, which read as far too much air before the
+     closing block even started. */
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-4);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+/* Border can't respect .container's own left/right padding on its own
+   box (it follows the border-box edge, drawn outside the padding) — same
+   issue and same fix as .site-footer__copy::before: draw the line on a
+   pseudo-element inset by .container's own side padding instead, so it
+   lines up with the content above/below it rather than running the full
+   max-width box edge to edge. */
+.project-cta::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--space-2);
+  right: var(--space-2);
+  border-top: 1px solid var(--color-sand);
+}
+.project-cta__text h2 {
+  font-size: 2.5rem; /* H2 tier: 40px, per feedback — was too small at 2rem */
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-1);
+}
+.project-cta__text h3 {
+  font-size: 1.625rem; /* H4 tier: 26px, per feedback ("H3 or H4") */
+  letter-spacing: -0.0192em;
+  font-weight: 700;
+}
+.project-cta__text .is-email,
+.project-cta__text .is-linkedin {
+  cursor: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity 0.18s ease;
+}
+.project-cta__text .is-email:hover,
+.project-cta__text .is-linkedin:hover { opacity: 0.85; }
+.project-cta__text .is-email { color: var(--color-pink); }
+.project-cta__text .is-linkedin { color: var(--color-green-dark); }
+
+.project-cta__top {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-green-dark);
+  color: var(--color-cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: none;
+  transition: background 0.18s ease;
+}
+.project-cta__top svg { width: 24px; height: 24px; }
+.project-cta__top:hover { background: var(--color-forest); }
+
+/* =====================================================
+   10. LIGHTBOX — click a photo-strip image to view it large,
    at its natural aspect ratio
    ===================================================== */
 
@@ -980,7 +1612,7 @@ body.is-pressing #cursor-flower {
 }
 
 /* =====================================================
-   10. RESPONSIVE — mobile-first
+   11. RESPONSIVE — mobile-first
    Breakpoints: mobile ≤480, tablet ≤768, desktop 1024+
    ===================================================== */
 
@@ -1018,6 +1650,10 @@ body.is-pressing #cursor-flower {
     left: var(--space-3);
     right: var(--space-3);
   }
+  .project-cta::before {
+    left: var(--space-3);
+    right: var(--space-3);
+  }
   .site-header__inner {
     /* Top/bottom shouldn't scale with the much-larger side margin here —
        half of it reads right, per feedback. */
@@ -1032,12 +1668,80 @@ body.is-pressing #cursor-flower {
     margin-right: 0;
     gap: var(--space-1);
   }
+
+  /* --- Project page template: tablet+ --- */
+  /* Larger hero size + the manual line break apply from tablet up, per
+     feedback — only true mobile widths keep the smaller, naturally-wrapped
+     version. */
+  .project-hero__heading { font-size: 4.5rem; }
+  .project-hero-break { display: inline; }
+
+  /* Carousel video stays full-bleed at this breakpoint too (arrows/dots
+     now live below it at every size, not beside it) — the breakout
+     margin just needs to match .container's own side padding, which
+     changes to --space-3 here. */
+  .video-carousel__track {
+    margin-left: calc(-1 * var(--space-3));
+    margin-right: calc(-1 * var(--space-3));
+  }
+
+  /* Full-viewport immersion restored here (see .video-carousel's base
+     rule for why it's dropped on mobile) — no padding at this breakpoint
+     either (see the base rule for why). */
+  .video-carousel {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .realworld-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "copy   winter"
+      "busfr  busen";
+  }
+  .realworld-grid__copy  { grid-area: copy; }
+  .realworld-grid__winter { grid-area: winter; }
+  .realworld-grid__busfr { grid-area: busfr; }
+  .realworld-grid__busen { grid-area: busen; }
+
+  .project-meta { grid-template-columns: repeat(2, 1fr); }
+  .project-gallery--trio { grid-template-columns: repeat(3, 1fr); }
+  .project-gallery--cover {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-areas: "socials bus posters";
+  }
+
+  /* Eyebrow/heading column beside the body copy, same pattern as
+     .about-intro's photo/text split. align-items:start (not the grid
+     default stretch) keeps the eyebrow's own flex box at its natural
+     height so it stays pinned to the top-left instead of vertically
+     centering against the much-taller copy column beside it. */
+  .project-section {
+    display: grid;
+    align-items: start;
+    grid-template-columns: 220px 1fr;
+    column-gap: var(--space-6);
+  }
+  .project-section .project-eyebrow { margin-bottom: 0; }
+  .project-section__copy { grid-column: 2; }
+
+  /* Paragraph indent (see mobile-only rule above) doesn't apply once the
+     grid column split itself provides the offset. Selector must match
+     the mobile rule's specificity exactly (including the child combinator
+     and :not(.project-eyebrow)) or the mobile rule — being more specific —
+     wins here too regardless of source order, which is exactly what
+     leaked the ~48px indent into desktop before this fix. */
+  .project-section__copy > p:not(.project-eyebrow) { padding-left: 0; }
+  .project-outcome__stats { margin-left: 0; }
+  .project-quote { margin-left: 0; }
+
 }
 
 @media (min-width: 1024px) {
   /* Desktop */
   .about-hero__heading { font-size: 4.5rem; }
   .about-hero__heading .hero-break { display: inline; }
+
 
   /* Back to a single inline row: name, icon, tagline (natural DOM order) */
   .site-header__brand {
@@ -1058,6 +1762,8 @@ body.is-pressing #cursor-flower {
   }
 
   .about-stats__grid { grid-template-columns: 1fr 1fr; }
+
+  .project-meta { grid-template-columns: repeat(4, 1fr); }
 
   /* Photo mosaic switches from the 3x3 mobile/tablet layout to the
      6-column x 2-row desktop layout — see about-desktop.jpg. */
