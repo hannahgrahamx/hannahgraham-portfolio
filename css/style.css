@@ -1015,6 +1015,15 @@ body.is-pressing #cursor-flower {
   color: var(--color-dark);
   margin-bottom: var(--space-2);
 }
+/* Optional second line for a two-part hero title (e.g. "Every Drop
+   Counts:" / "A Breastfeeding Guide for You and Your Family") — sized in
+   em off the parent heading's own font-size, so it scales at both
+   breakpoints automatically instead of needing its own media query. */
+.project-hero__heading-sub {
+  display: block;
+  font-size: 0.65em;
+  margin-top: 0.2em;
+}
 .project-hero__tagline {
   font-size: 1.25rem; /* Body LG tier: 20px, per STYLE.md */
   line-height: 1.4;
@@ -1083,6 +1092,18 @@ body.is-pressing #cursor-flower {
    with the 48px rhythm unchanged between the three galleries themselves. */
 .project-gallery--first { margin-top: var(--space-12); }
 
+/* Opt-in: cancels .container's side padding so the gallery runs edge to
+   edge on mobile only, resetting to the normal inset at tablet+ — same
+   breakout technique as .video-carousel__track, just scoped to mobile
+   alone instead of mobile+tablet. */
+.project-gallery--bleed-mobile {
+  margin-left: calc(-1 * var(--space-2));
+  margin-right: calc(-1 * var(--space-2));
+}
+@media (min-width: 769px) {
+  .project-gallery--bleed-mobile { margin-left: 0; margin-right: 0; }
+}
+
 /* Cover gallery: mobile keeps the bespoke mosaic (posters full-width on
    top, socials+bus split below) — the "stay in one row" feedback was
    specifically for tablet/desktop, not mobile, per follow-up
@@ -1137,30 +1158,35 @@ body.is-pressing #cursor-flower {
   padding-bottom: 0;
 }
 
-/* Exception to the standard above: the video carousel that follows this
-   section has its own dark/graph-textured background, so if IT owned the
-   entering gap (its usual padding-top), that gap would be painted dark —
-   it'd read as more dark space inside the carousel, not as an actual gap
-   between the two sections. The gap needs to be cream, so Overview (the
-   cream section) owns it instead, on its OUTGOING side — the one
-   deliberate exception to "entering side always owns it" on this page,
-   same category as the carousel's own fixed-height exception below. */
-.project-section--overview {
-  /* Second exception: the cover gallery right above this section and
-     Overview's own intro copy read as one group (the gallery is what
-     Overview is describing), not two separate topics — so the entering
-     side uses the tighter 48px "keep together" rhythm instead of the
-     standard gap, per feedback. The outgoing side (below) keeps the
-     standard/exception gap into the carousel as normal. */
-  padding-top: var(--space-4);
-  padding-bottom: var(--space-12);
-}
+/* Two opt-in exceptions to the standard above, kept as generic modifiers
+   rather than hardcoded to any one section name — .project-section--overview
+   etc. are shared class names across every project page (per the reusable
+   template), so a page-specific exception hardcoded to one of those names
+   would silently leak onto every other page reusing it. Apply these only
+   on the page/section that actually needs them. */
+/* For a section whose own colour/texture would tint the entering gap if
+   IT owned the standard padding-top (e.g. a section right before a dark
+   or fixed-height block that can't take padding without the gap reading
+   as "more of that block's colour" instead of empty space) — the PRECEDING
+   section owns the gap instead, on its outgoing side. */
+.project-section--owns-exit { padding-bottom: var(--space-12); }
+/* For a section that reads as one group with the content directly above
+   it (not a fresh topic) — uses the tighter 48px "keep together" rhythm
+   on its entering side instead of the standard gap. */
+.project-section--grouped-top { padding-top: var(--space-4); }
 
 /* Section-start padding for bare (non-.project-section) content blocks —
    see the standard documented on .project-section above. */
 .project-block {
   padding-top: var(--space-12);
 }
+/* Opt-in: cancels the standard gap for a .project-block that sits
+   directly below a full-viewport hero (.project-hero, min-height:100vh)
+   — the hero itself already fills the screen, so the extra 144px on top
+   of that was compounding into a huge stretch of blank scrolling before
+   any real content appeared. Scoped to specific instances rather than
+   the shared .project-block default, which other pages still rely on. */
+.project-block--flush-hero { padding-top: 0; }
 .project-section__copy p + p {
   margin-top: var(--space-2);
 }
@@ -1251,6 +1277,14 @@ body.is-pressing #cursor-flower {
     grid-template-columns: 1fr 1fr;
   }
 }
+/* Three-stat variant (mental-health-campaign's 14% / AA / EN-FR row) —
+   stays single-column until the standard tablet+ breakpoint since three
+   columns get cramped at the 426px point the two-stat variant uses. */
+@media (min-width: 769px) {
+  .project-outcome__stats--trio {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
 .project-outcome__stat {
   border-left: 3px solid var(--stat-color, var(--color-green));
   padding-left: var(--space-2);
@@ -1258,12 +1292,20 @@ body.is-pressing #cursor-flower {
 .project-outcome__stat h3 {
   font-size: 2rem;
   letter-spacing: -0.02em;
-  color: var(--stat-color, var(--color-green));
+  /* --stat-text-color lets a variant use a different shade for the text
+     than the border (e.g. --olive below) — falls back to the border's
+     own colour for variants that don't set it, so --green/--pink are
+     unaffected. */
+  color: var(--stat-text-color, var(--stat-color, var(--color-green)));
   margin-bottom: 0.25rem;
 }
 .project-outcome__stat p { font-size: 0.9rem; }
 .project-outcome__stat--green { --stat-color: var(--color-green-dark); }
 .project-outcome__stat--pink  { --stat-color: var(--color-pink); }
+.project-outcome__stat--olive {
+  --stat-color: var(--color-green);
+  --stat-text-color: var(--color-forest);
+}
 
 /* --- 9g. Quote card ---
    Same offset-shadow language as .about-intro__photo (green top-left,
@@ -1284,6 +1326,13 @@ body.is-pressing #cursor-flower {
   font-size: 1.25rem;
   line-height: 1.4;
   color: var(--color-dark);
+}
+.project-quote cite {
+  display: block;
+  margin-top: var(--space-1);
+  font-style: normal;
+  font-size: 0.875rem;
+  color: var(--color-green-dark);
 }
 
 /* --- 9h. Approach numbered list --- */
@@ -1324,6 +1373,64 @@ body.is-pressing #cursor-flower {
   margin: var(--space-4) 0;
 }
 .project-gallery-band .project-gallery { margin: 0; }
+/* Same "outer edge of a group gets the standard gap, everything between
+   stays at the tighter margin" pattern as .project-gallery--first/--last,
+   for bands that open/close a sequence rather than sitting in the middle
+   of one. margin (not padding) is what makes this safe on a band that
+   has its own background colour — margin never paints, so it doesn't
+   matter which side declares it, unlike the video-carousel's padding
+   exception elsewhere on this page. */
+.project-gallery-band--first { margin-top: var(--space-12); }
+.project-gallery-band--last { margin-bottom: 0; }
+.project-gallery__caption {
+  margin-top: var(--space-1);
+  font-size: 0.875rem; /* Labels tier: 14px */
+  font-weight: 440;
+  text-transform: uppercase;
+  color: var(--color-dark);
+}
+/* .project-gallery's own margin-bottom (48px, from the base rule) was
+   stacking with this caption's margin-top, pushing the caption far below
+   the image instead of hugging it. Zero it whenever a caption directly
+   follows, so the caption's own 12px margin-top is the only gap — self-
+   maintaining wherever this image+caption pattern gets reused. */
+.project-gallery:has(+ .project-gallery__caption) { margin-bottom: 0; }
+
+/* --- 9i-2. Site-wide video UI ---
+   Standard interaction pattern for every video on every project page:
+   controls are hidden by default (ambient autoplay/loop reads cleaner
+   without a permanently-visible seek bar) and only shown on hover, and a
+   transient play/pause icon flashes centre-screen on every real state
+   change. See main.js's generic .video-ui handler — it works on any
+   wrapper with this class, so new videos opt in just by using this
+   markup, no per-page JS needed. */
+.video-ui {
+  position: relative;
+  cursor: none;
+}
+.video-ui__flash {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(44, 44, 44, 0.55);
+  color: var(--color-cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.video-ui__flash.is-visible {
+  opacity: 1;
+  transition: opacity 0.1s ease;
+}
+.video-ui__flash svg { width: 28px; height: 28px; }
+.video-ui__flash .icon-play { margin-left: 3px; } /* optically centre the triangle */
 
 /* --- 9j. Video carousel ---
    Spans the full viewport height per feedback (100dvh — adjusts to
@@ -1506,15 +1613,14 @@ body.is-pressing #cursor-flower {
   /* border-top sits at this box's own top edge, painted BEFORE padding —
      so padding-top alone (the usual section-gap pattern) put the real
      gap between the line and the heading, leaving the line itself flush
-     against the gallery images above it with no visible space at all.
-     margin-top pushes the line itself away from the images (collapses
-     against the gallery's own margin-bottom:0). The whole CTA block —
-     entering gap, internal padding — reads as its own smaller tier, not
-     tied to the page's standard section-break gap: all three (margin-top,
-     padding-top, padding-bottom) are --space-4 per feedback, down from
-     --space-12 on the margin, which read as far too much air before the
-     closing block even started. */
-  margin-top: var(--space-4);
+     against the content above it with no visible space at all. margin-top
+     pushes the line itself away from that content instead (collapses
+     against the preceding element's own margin/padding-bottom:0), and
+     defaults to the page's standard section-gap (--space-12) like every
+     other true section break. Internal padding (line-to-heading,
+     content-to-footer) is its own smaller, fixed tier regardless of page
+     — --space-4 for both, not tied to the entrance gap. */
+  margin-top: var(--space-12);
   padding-top: var(--space-4);
   padding-bottom: var(--space-4);
   position: relative;
@@ -1523,6 +1629,14 @@ body.is-pressing #cursor-flower {
   justify-content: space-between;
   gap: var(--space-3);
 }
+/* Opt-in: pages where the CTA should read as grouped with the content
+   right above it rather than a fresh section break — .project-cta is a
+   shared class across every project page, so this has to be an opt-in
+   modifier rather than a change to the base rule, or it'd silently
+   change every other page reusing it (this is the same bleed bug
+   .project-section--grouped-top was introduced to fix). Currently just
+   sexual-health-campaign, per feedback ("feels huge, bring down to 48"). */
+.project-cta--grouped-top { margin-top: var(--space-4); }
 /* Border can't respect .container's own left/right padding on its own
    box (it follows the border-box edge, drawn outside the padding) — same
    issue and same fix as .site-footer__copy::before: draw the line on a
@@ -1574,6 +1688,490 @@ body.is-pressing #cursor-flower {
 }
 .project-cta__top svg { width: 24px; height: 24px; }
 .project-cta__top:hover { background: var(--color-forest); }
+
+/* --- 9l. Mental-health-campaign additions ---
+   New, reusable-enough-to-share components introduced for this page —
+   kept generic (not "mental-health-"-prefixed) per the template
+   philosophy, in case a future project page wants the same shapes. */
+
+/* Stat feature band: cover image + a callout stat, side by side on
+   desktop, stat-card-first on mobile (source order already matches
+   mobile — the grid areas just relocate the image on top at tablet+, no
+   real DOM reordering needed). margin-top (not padding) owns the
+   entrance gap since this section has its own sand background — same
+   reasoning as .project-gallery-band--first. */
+.stat-feature {
+  background: var(--color-sand);
+  margin-top: var(--space-12);
+  padding: var(--space-4) 0;
+  /* Mobile-only: top padding (the sand band's own space above the grid)
+     matches the container's side margins (24px) instead of the section's
+     uniform 48px — per feedback, reset at tablet+ below. */
+  padding-top: var(--space-2);
+}
+.stat-feature__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas: "card" "image";
+  gap: var(--space-1);
+}
+.stat-feature__image {
+  grid-area: image;
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: none;
+}
+.stat-feature__card {
+  grid-area: card;
+  background: var(--color-cream);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.stat-feature__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--color-green);
+  color: var(--color-cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-2);
+}
+.stat-feature__icon svg { width: 28px; height: 28px; }
+.stat-feature__headline {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.625rem; /* H4 tier: 26px on mobile — bumped to H2/40px at tablet+ below */
+  letter-spacing: -0.0192em;
+  line-height: 1.25;
+  color: var(--color-dark);
+}
+.stat-feature__headline .is-pink { color: var(--color-pink); }
+/* Locked line breaks — same technique as .project-hero-break: hidden
+   (mobile wraps naturally at the smaller H4 size) until tablet+, where
+   they're forced on so the headline always breaks "During the months /
+   the campaign ran, / calls to the helpline / increased by 14%" exactly,
+   regardless of how the natural wrap would otherwise fall at a given
+   viewport width. */
+.stat-feature__break { display: none; }
+.stat-feature__body {
+  /* Mobile-only: tighter heading-to-body gap (12px), reset at tablet+
+     below — per feedback. */
+  margin-top: var(--space-1);
+}
+@media (min-width: 769px) {
+  .stat-feature__grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "image card";
+    gap: var(--space-2);
+  }
+  .stat-feature { padding-top: var(--space-4); }
+  .stat-feature__headline {
+    font-size: 2.5rem; /* H2 tier: 40px, per feedback */
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  .stat-feature__break { display: block; }
+  /* "increased by 14%" stays on one line at desktop, per feedback —
+     mobile is left free to wrap since the narrower column makes that
+     unavoidable at this font size. */
+  .stat-feature__headline .is-pink { white-space: nowrap; }
+  .stat-feature__body { margin-top: var(--space-2); }
+}
+
+/* Media pair: two videos, shown at once, no carousel/arrows needed since
+   both are visible simultaneously (unlike the sexual-health-campaign
+   carousel, which needed navigation for 4). No illustrated device-frame
+   chrome and no colour-panel background either, per feedback — just the
+   videos themselves filling the width side by side, same shape as
+   .project-gallery--pair. margin-top owns the entrance gap, matching
+   .project-gallery--first elsewhere on this page. */
+.media-pair {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-1);
+  margin-top: var(--space-12);
+}
+.media-pair__video {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.media-pair__caption {
+  margin-top: var(--space-1);
+  font-size: 0.875rem; /* Labels tier: 14px */
+  font-weight: 440;
+  text-transform: uppercase;
+  color: var(--color-dark);
+}
+@media (min-width: 769px) {
+  .media-pair { grid-template-columns: 1fr 1fr; }
+}
+
+/* Masonry grid: digital ads on top, static square below it (same
+   column), static story spanning both rows in a second, taller column —
+   source order (ads, square, story) already matches the mobile stacking
+   order, grid-template-areas just relocates them at tablet+. */
+.masonry-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: start;
+  gap: var(--space-4);
+}
+.masonry-grid img {
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: none;
+}
+.masonry-grid figcaption {
+  margin-top: var(--space-1);
+  font-size: 0.875rem; /* Labels tier: 14px */
+  font-weight: 440;
+  text-transform: uppercase;
+  color: var(--color-dark);
+}
+@media (min-width: 769px) {
+  .masonry-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "ads story" "square story";
+    gap: var(--space-2);
+  }
+  .masonry-grid__ads { grid-area: ads; }
+  .masonry-grid__square { grid-area: square; }
+  .masonry-grid__story { grid-area: story; align-self: center; }
+}
+
+/* Generalizes per-image captions to any .project-gallery (trio or pair)
+   whose children are <figure>+<figcaption> instead of bare <img> — same
+   Labels-tier treatment as .masonry-grid figcaption, so any gallery on
+   any project page can opt into individual captions for free. */
+.project-gallery figcaption {
+  margin-top: var(--space-1);
+  font-size: 0.875rem; /* Labels tier: 14px */
+  font-weight: 440;
+  text-transform: uppercase;
+  color: var(--color-dark);
+}
+
+/* --- 9m. MyHealthNB-launch additions ---
+   Same "generic, reusable" philosophy as the mental-health-campaign
+   additions above. */
+
+/* Plain heading, no eyebrow/icon — used standalone above a gallery
+   ("Supporting materials for the Launch", "Phase two") rather than as
+   part of the eyebrow+copy .project-section pattern. */
+.section-heading {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 2.5rem; /* H2 tier: 40px */
+  letter-spacing: -0.02em;
+  color: var(--color-dark);
+  margin-bottom: var(--space-2);
+}
+/* Cancels .project-gallery's own 48px margin-top when it directly
+   follows a standalone heading (e.g. "Supporting materials for the
+   Launch") — same collapsing-margin issue and fix as
+   .project-gallery:has(+ .project-gallery__caption), just on the other
+   side. Without this the two margins stacked to a much bigger gap than
+   the heading's own 24px. */
+.section-heading + .project-gallery { margin-top: 0; }
+
+/* Single-video feature: the launch film itself, full-bleed dark/textured
+   section, no carousel chrome since there's only one video (unlike
+   sexual-health-campaign's 4-video carousel). Caption styling matches
+   .video-carousel__caption's dark-bg treatment, except left-aligned as
+   a block (not centred) — that video is a full-width horizontal film,
+   not a narrow portrait clip, so a centred caption block sat well off
+   from the video's own left edge instead of lining up with it.
+   Symmetric internal padding, top and bottom, around the video+caption —
+   this is independent of the EXTERNAL entering gap, which Overview owns
+   via its own padding-bottom (.project-section--owns-exit) so it reads
+   as cream space, not more dark box. */
+.video-feature {
+  padding: var(--space-4) 0;
+}
+.video-feature__video {
+  display: block;
+  max-width: 100%;
+  max-height: 70vh;
+  max-height: 70dvh;
+  width: auto;
+  height: auto;
+  margin: 0 auto;
+  background: var(--color-dark);
+}
+.video-feature__caption {
+  /* No max-width (unlike .video-carousel__caption) — this video spans
+     the full container width, so the caption has plenty of room to sit
+     on one line instead of wrapping, per feedback. */
+  margin: var(--space-2) 0 0;
+  font-size: 0.75rem;
+  font-weight: 440;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-sand);
+  text-align: left;
+}
+
+/* Text + 2 images, 3 equal columns at tablet+ (the brand-statement quote
+   sits in the first column instead of an image) — sand band, reuses
+   .project-gallery-band's background/margin handling directly. */
+.text-media-trio {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  gap: var(--space-3);
+}
+.text-media-trio__text {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 1.625rem; /* H4 tier: 26px */
+  letter-spacing: -0.0192em;
+  line-height: 1.3;
+  color: var(--color-dark);
+}
+.text-media-trio img {
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: none;
+}
+.text-media-trio figcaption {
+  margin-top: var(--space-1);
+  font-size: 0.875rem;
+  font-weight: 440;
+  text-transform: uppercase;
+  color: var(--color-dark);
+}
+@media (min-width: 769px) {
+  .text-media-trio { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* "Phase two" band: heading + right-aligned "Continued" label, then a
+   video (left) with a stack of supporting stills (right) — the stack
+   items are currently placeholders, see .asset-placeholder below. */
+.phase-band__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.phase-band__label {
+  font-size: 0.875rem; /* Labels tier: 14px */
+  font-weight: 440;
+  text-transform: uppercase;
+  color: var(--color-green-dark);
+  flex-shrink: 0;
+}
+.phase-two-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+}
+/* Taller than the default placeholder so it reads roughly video-sized
+   next to the stack of three smaller placeholders beside it. */
+.phase-two-grid > .asset-placeholder { min-height: 400px; }
+.phase-two-grid__stack {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-1);
+}
+@media (min-width: 769px) {
+  .phase-two-grid { grid-template-columns: 2fr 1fr; }
+}
+
+/* Stand-in for an asset that hasn't been provided yet — dashed border
+   reads clearly as "placeholder," not a real design choice, and
+   data-pending-asset names the exact missing file so these are easy to
+   grep for before this page ships. */
+.asset-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  background: var(--color-sand);
+  border: 2px dashed var(--color-green-dark);
+  color: var(--color-green-dark);
+  font-size: 0.75rem;
+  font-weight: 440;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: center;
+  line-height: 1.6;
+  padding: var(--space-2);
+}
+.asset-placeholder--tall { aspect-ratio: 2 / 3; min-height: 320px; }
+
+/* Reflection's closing statement reads larger than standard body copy —
+   Body LG tier, per the reference. */
+.reflection-statement {
+  font-size: 1.25rem;
+  line-height: 1.4;
+}
+
+/* --- 9n. Breastfeeding-guide additions --- */
+
+/* Inline callout quote (e.g. "the user" + its description) — a lighter
+   touch than .project-quote's sand card + offset shadow: just a bold
+   label and a pink left-border, sitting directly in the section copy. */
+.callout-quote__label {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1rem;
+  margin-top: var(--space-3);
+}
+.callout-quote {
+  border-left: 3px solid var(--color-pink);
+  padding-left: var(--space-2);
+  margin-top: var(--space-1);
+}
+.callout-quote p {
+  font-size: 1rem;
+}
+
+/* True edge-to-edge image, no container/side padding at all — distinct
+   from .project-gallery-band, which keeps a colour background behind an
+   inset image. Here the image itself IS the full-bleed content. */
+.full-bleed-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  cursor: none;
+  /* Standard entrance gap, owned here since the image itself has no
+     wrapping section to put padding on — margin is safe regardless of
+     which side owns it (it never paints), so this works the same way
+     for both usages on this page (into guide-spine.jpg from Overview,
+     and into open-toc-green.jpg from the carousel). */
+  margin-top: var(--space-12);
+}
+
+/* Approach carousel: identical structure/behaviour to .video-carousel —
+   arrows + dots + swipe, JS-driven translateX on a sliding track, same
+   grid layout (track spans the top, arrows/dots share a row underneath)
+   — just image+text slides instead of video. No scroll/wheel
+   involvement (tried that, including a position:sticky hold — reverted,
+   per feedback, to match the horizontal carousel exactly). No padding
+   on the section itself — it's dark/graph-textured, so any padding here
+   would just be more dark space, not a visible gap; the entrance gap is
+   owned by Approach's own padding-bottom (.project-section--owns-exit)
+   and the exit gap by the closing image's own margin-top
+   (.full-bleed-image), same reasoning as everywhere else on this page. */
+.vertical-carousel {
+  height: 100vh;
+  height: 100dvh;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.vertical-carousel__viewport {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "track track track"
+    "prev  dots  next";
+  row-gap: var(--space-2); /* 24px, per feedback */
+  align-items: center;
+  align-content: center;
+}
+.vertical-carousel__arrow {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  color: var(--color-green-light);
+  cursor: none;
+  transition: color 0.18s ease;
+}
+.vertical-carousel__arrow svg { width: 100%; height: 100%; }
+.vertical-carousel__arrow:hover { color: var(--color-cream); }
+.vertical-carousel__arrow--prev { grid-area: prev; }
+.vertical-carousel__arrow--next { grid-area: next; }
+.vertical-carousel__dots {
+  grid-area: dots;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+}
+.vertical-carousel__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-green-light);
+  background: transparent;
+  cursor: none;
+  padding: 0;
+  transition: background 0.18s ease;
+}
+.vertical-carousel__dot.is-active {
+  background: var(--color-green-light);
+}
+.vertical-carousel__track {
+  grid-area: track;
+  min-width: 0;
+  overflow: hidden;
+}
+.vertical-carousel__slides {
+  display: flex;
+  transition: transform 0.3s ease-in-out;
+}
+.vertical-carousel__slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+/* Stacked (image on top, text below) on mobile — not enough width for
+   two real columns; two columns (image left, text right) from tablet+. */
+.vertical-carousel__content {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: var(--space-2);
+  align-items: center;
+}
+.vertical-carousel__content img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  max-height: 45vh;
+  max-height: 45dvh;
+  aspect-ratio: 1921 / 1401; /* uniform crop box — source images vary 1.25:1–1.37:1 natively, this pins them all to the same shape */
+  object-fit: cover;
+  margin: 0 auto;
+  cursor: none;
+}
+.vertical-carousel__text h3 {
+  font-size: 1.375rem; /* H5/H6-ish, between the two per the reference */
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-cream);
+}
+.vertical-carousel__text p {
+  margin-top: var(--space-1);
+  color: var(--color-sand);
+}
+@media (min-width: 769px) {
+  .vertical-carousel__content {
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--space-4);
+  }
+  .vertical-carousel__content img {
+    max-height: 60vh;
+    max-height: 60dvh;
+    margin: 0 auto 0 0;
+  }
+}
 
 /* =====================================================
    10. LIGHTBOX — click a photo-strip image to view it large,
