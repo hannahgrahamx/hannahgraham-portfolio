@@ -59,13 +59,21 @@ Define these as CSS custom properties in `:root` — never hardcode hex values i
 - Opacity: 10%
 - Background it sits on: `#131412`
 
-## Hero Text Gradient (layered glow effect)
-Applied to hero heading text, three stacked layers:
-1. 100% opacity, normal blend
-2. 100% opacity, hard-light blend, 50px blur
-3. 80% opacity, color-dodge blend, 50px blur
+## Hero Text Gradient
+The home hero heading (index.html) uses one crisp gradient-clipped text
+layer — no glow/blur duplicates. An earlier version of this spec called
+for three stacked layers (normal blend + two blurred/blended duplicates
+at hard-light/color-dodge, 50px blur), matching the original PRD
+reference screenshots below. That layered-glow version was removed per
+feedback: it read as a colourful halo glowing outward from the text
+rather than gradient color living inside the letterforms, and it visually
+competed with the chromatic-aberration effect added alongside it (see
+`.home-hero__heading-glitch` in style.css). The gradient stops/colors
+themselves are unchanged, only the glow layers are gone.
 
-**Verify against:** `portfolio-website-PRD/Screenshot_2026-07-26_at_6.10.54_PM.png` and `..._6.10.33_PM.png` — open these directly, don't infer from this description alone.
+**Original glow-layer reference (superseded, kept for history):**
+`portfolio-website-PRD/Screenshot_2026-07-26_at_6.10.54_PM.png` and
+`..._6.10.33_PM.png`.
 
 ## Primary Background Gradient — LOCKED IN
 **Technique: a `conic-gradient` on a nested layer, not layered radial circles.** Several early passes tried building this from separately-positioned blurred ellipses/circles (which is how the original PRD construction file — `..._6.19.19_PM.png` — was actually built in Figma), but that approach kept fighting itself: paint order, per-shape overlap math, and per-breakpoint blur tuning all needed constant rework, and it never read as genuinely *blended* — always more like several distinct soft blobs sitting next to each other. A conic-gradient transitions continuously through every color stop by construction, which is what "blended/merging" actually needed. The color sequence/technique (a smooth multi-stop sweep, softened afterward) is adapted from `assets/css/style.css`'s `.hero__headline` — an earlier design draft not otherwise used on this page, but which happened to already have a soft multi-color conic sweep worth reusing here. **This gradient is shared site-wide**: every project page (mental-health-campaign, myhealthnb-launch, breastfeeding-guide, sexual-health-campaign) uses this identical `.bg-gradient-primary`/`.hero-gradient-layer` background on its hero, same as About — confirmed by the user; an earlier draft of this note incorrectly said project pages used their own per-project accent colors instead, which is wrong.

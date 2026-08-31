@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="/css/style.css?v=83">
+  <link rel="stylesheet" href="/css/style.css?v=152">
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-DXP7KQ58ZQ"></script>
@@ -138,14 +138,16 @@
     <!-- Launch film -->
     <section class="video-feature bg-graph">
       <div class="video-feature__inner container">
-        <div class="video-ui">
-          <video class="video-feature__video" src="/assets/myhealthnb-launch/app-launch-en.mp4" autoplay muted loop playsinline></video>
-          <div class="video-ui__flash" aria-hidden="true">
-            <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
-            <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"></path></svg>
+        <div class="video-feature__media">
+          <div class="video-ui">
+            <video class="video-feature__video" src="/assets/myhealthnb-launch/app-launch-en.mp4" autoplay muted loop playsinline></video>
+            <div class="video-ui__flash" aria-hidden="true">
+              <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+              <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"></path></svg>
+            </div>
           </div>
+          <p class="video-feature__caption">Horizontal Video | Used Across Social Media, Paid Web and TV Ads and Displayed in Public Service Offices</p>
         </div>
-        <p class="video-feature__caption">Horizontal Video | Used Across Social Media, Paid Web and TV Ads and Displayed in Public Service Offices</p>
       </div>
     </section>
 
@@ -236,7 +238,7 @@
           <figcaption>Banners</figcaption>
         </figure>
         <figure>
-          <img src="/assets/myhealthnb-launch/banner-linkedin.png" alt="Photo of the VeroSource team at the State of the Province address, posed beside a MyHealthNB banner.">
+          <img src="/assets/myhealthnb-launch/banner-linkedin.png" alt="Photo of the VeroSource team at the State of the Province address, posed beside a MyHealthNB banner." class="is-height-matched">
           <figcaption>Photo from VeroSource&rsquo;s LinkedIn page</figcaption>
         </figure>
         <figure>
@@ -333,6 +335,36 @@
       </a>
     </div>
 
+    <!-- View more — links to the other project pages -->
+    <section class="project-viewmore project-section container">
+      <p class="project-eyebrow project-eyebrow--icon">View More</p>
+      <div class="project-section__copy">
+        <div class="viewmore-grid">
+          <a class="project-card" href="/pages/sexual-health-campaign.html" data-cursor-label="View project">
+            <img src="/assets/sexual-health-campaign/cover.jpg" alt="A weathered black poster reading 'health professionals do it all the time' with a heartbeat line graphic, on a blue background.">
+            <div class="project-card__caption">
+              <h3>Provincial Sexual Health Awareness</h3>
+              <p>Awareness Campaign</p>
+            </div>
+          </a>
+          <a class="project-card is-expanded" href="/pages/mental-health-campaign.html" data-cursor-label="View project">
+            <img src="/assets/mental-health-campaign/general.jpg" alt="Flat lay of the campaign's printed handouts, pamphlet and phone mockups on a bright green background.">
+            <div class="project-card__caption">
+              <h3>Provincial Mental Health Awareness</h3>
+              <p>Awareness Campaign</p>
+            </div>
+          </a>
+          <a class="project-card" href="/pages/breastfeeding-guide.html" data-cursor-label="View project">
+            <img src="/assets/breastfeeding-guide/guide-cover.jpg" alt="Cover of the redesigned breastfeeding guide booklet on a light blue background.">
+            <div class="project-card__caption">
+              <h3>Breastfeeding Guide</h3>
+              <p>Editorial</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- Footer -->
@@ -355,6 +387,6 @@
     <img id="lightbox__img" src="" alt="">
   </div>
 
-  <script src="/js/main.js?v=23"></script>
+  <script src="/js/main.js?v=24"></script>
 </body>
 </html>

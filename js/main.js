@@ -351,4 +351,34 @@
       }, { passive: true });
     }
   });
+
+  /* --- Marquee: duplicate the author's one word-set enough times that
+     the loop never runs out of content and shows a gap — a fixed 2x
+     duplicate only stays gapless while the viewport is narrower than one
+     set's rendered width, which isn't reliably true across breakpoints. */
+  document.querySelectorAll('.marquee__track').forEach((track) => {
+    const originalChildren = Array.from(track.children);
+    if (!originalChildren.length) return;
+
+    function build() {
+      track.style.animation = 'none';
+      track.innerHTML = '';
+      originalChildren.forEach((el) => track.appendChild(el.cloneNode(true)));
+      const setWidth = track.scrollWidth;
+      const k = Math.ceil((window.innerWidth * 1.2) / setWidth);
+      const setsNeeded = Math.max(2, k * 2);
+      for (let i = 1; i < setsNeeded; i++) {
+        originalChildren.forEach((el) => track.appendChild(el.cloneNode(true)));
+      }
+      track.style.animation = '';
+    }
+
+    build();
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(build, 200);
+    });
+  });
 })();

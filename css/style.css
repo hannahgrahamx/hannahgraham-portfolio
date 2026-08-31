@@ -1,6 +1,23 @@
 /* ============================================================
    Hannah Graham Portfolio — Main Stylesheet
    Shared across all pages (index.html, /pages/*.html)
+
+   Contents
+   1.  TOKENS — colour, type, spacing
+   2.  RESET & BASE
+   3.  "THE GRAPH" — shared grid-pattern background
+   4.  CUSTOM CURSOR — flower + context pop-up
+   5.  BUTTONS
+   6.  HEADER / NAVIGATION
+   7.  FOOTER
+   8.  ABOUT PAGE
+   9.  PROJECT PAGE TEMPLATE
+   10. LIGHTBOX
+   11. HOME PAGE
+   12. RESPONSIVE — mobile-first tablet/desktop overrides for everything
+       above (cross-component; some components keep their own @media
+       blocks colocated with their base rules instead — see 12's own
+       intro comment for which is which)
    ============================================================ */
 
 /* =====================================================
@@ -50,7 +67,8 @@
   --space-11: 8.25rem; /* 132px */
   --space-12: 9rem;    /* 144px — extends past STYLE.md's documented 12-132px scale, added per explicit feedback */
 
-  --max-width: 1200px;
+  --max-width: 1200px; /* body content — reverted from 1500px per feedback (that value now only applies to header/footer, see --max-width-wide) */
+  --max-width-wide: 1500px; /* header/footer only — see .site-header__inner/.site-footer__top/.site-footer__copy overrides below .container */
 }
 
 /* Single source of truth for horizontal alignment. Every section wraps its
@@ -62,6 +80,14 @@
   margin: 0 auto;
   padding-left: var(--space-2); /* 24px on mobile, per feedback — was 36px. Restored to 36px at tablet+ */
   padding-right: var(--space-2);
+}
+/* Header/footer opt into the wider cap — everything else using
+   .container (body content sections) stays at the narrower default
+   above, per feedback splitting the two. */
+.site-header__inner,
+.site-footer__top,
+.site-footer__copy {
+  max-width: var(--max-width-wide);
 }
 
 /* =====================================================
@@ -102,7 +128,7 @@ h1, h2, h3, h4 { font-family: var(--font-heading); font-weight: 700; line-height
 
 ::selection {
   background-color: rgba(253, 142, 189, 0.3); /* --color-pink-light @ 30%, per STYLE.md — was 100%, made pink text illegible */
-  color: var(--color-pink);
+  color: var(--color-pink); /* regular pink, per feedback — reverted from the pink-dark pass applied to other light-background text elsewhere on the site */
 }
 
 /* Visible focus state for keyboard users — required regardless of the
@@ -307,7 +333,7 @@ body.is-pressing #cursor-flower {
 /* Custom text-highlight effect (used inline within copy, e.g. hero headline) */
 .text-highlight {
   background-color: rgba(253, 142, 189, 0.3); /* --color-pink-light @ 30% */
-  color: var(--color-pink);
+  color: var(--color-pink); /* regular pink, per feedback — reverted from the pink-dark pass applied to other light-background text elsewhere on the site */
   padding: 0 0.15em;
 }
 
@@ -401,7 +427,7 @@ body.is-pressing #cursor-flower {
   font-family: var(--font-body);
   font-weight: 700;
   font-size: 0.75rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em; /* was 0.06em — matched to .btn's 5%, per feedback */
   text-transform: uppercase;
   color: var(--color-green-dark);
   text-decoration: underline;
@@ -501,7 +527,7 @@ body.is-pressing #cursor-flower {
 }
 
 .site-nav__links a.is-current {
-  color: var(--color-pink);
+  color: var(--color-pink-dark); /* dark variant on the light header background, per feedback */
   text-decoration: underline;
   text-underline-offset: 3px;
   border-color: transparent;
@@ -600,7 +626,7 @@ body.is-pressing #cursor-flower {
   color: var(--color-dark);
   text-align: right;
 }
-.mobile-nav__links-top a.is-current { color: var(--color-pink); }
+.mobile-nav__links-top a.is-current { color: var(--color-pink-dark); } /* dark variant on the light mobile-nav panel, per feedback */
 
 .mobile-nav__links-bottom {
   display: flex;
@@ -665,8 +691,8 @@ body.is-pressing #cursor-flower {
 .site-footer__copy {
   position: relative;
   padding-top: var(--space-2);
-  font-size: 0.65rem;
-  letter-spacing: 0.08em;
+  font-size: 0.65rem; /* smaller than Labels tier on purpose — fine-print copyright line, quieter than any real content label */
+  letter-spacing: 0; /* matches the Labels-tier convention (was its own one-off 0.08em) — the smaller size alone is enough to read as quieter, per feedback */
   text-transform: uppercase;
   color: var(--color-sand);
 }
@@ -700,9 +726,16 @@ body.is-pressing #cursor-flower {
    8. ABOUT PAGE
    ===================================================== */
 
-/* --- 8a. Hero band --- */
+/* --- 8a. Hero band ---
+   Top: --space-12 (144px), per feedback — space before the "I design
+   with purpose..." heading itself, between it and the sticky header.
+   No bottom padding — .about-intro right below it now owns that gap via
+   its own padding-top (project-page section-spacing standard: the
+   entering element owns the gap, generally via padding-top), instead of
+   splitting ownership between this section's bottom padding and the
+   next one's top padding. */
 .about-hero {
-  padding: var(--space-5) 0 var(--space-3);
+  padding: var(--space-12) 0 0;
 }
 
 .about-hero__heading {
@@ -712,7 +745,7 @@ body.is-pressing #cursor-flower {
   color: var(--color-dark);
 }
 
-.about-hero__heading .is-pink { color: var(--color-pink); }
+.about-hero__heading .is-pink { color: var(--color-pink-dark); } /* dark variant on the light hero background, per feedback */
 .about-hero__heading .is-green { color: var(--color-green-dark); }
 .about-hero__heading .hero-break { display: none; }
 .project-hero-break { display: none; } /* shown at desktop only, see media query — mobile wraps naturally */
@@ -725,7 +758,16 @@ body.is-pressing #cursor-flower {
 .about-intro {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: var(--space-5) var(--space-2); /* horizontal: 24px on mobile, restored to 36px at tablet+ */
+  /* Top: --space-4 (48px), matching project pages' "grouped-top" tier —
+     this section is a continuation of the hero's personal-intro topic
+     (same relationship as a project-hero flowing into its cover-trio),
+     not a fresh topic break, so it uses the smaller grouped value rather
+     than a full --space-12 break. Bottom: --space-12 via margin (not
+     padding) below, since the section AFTER this one (.about-stats) has
+     its own dark background — margin doesn't paint, so this owns the
+     exit without tinting the gap the wrong color. */
+  padding: var(--space-4) var(--space-2) 0;
+  margin-bottom: var(--space-12);
   display: grid;
   grid-template-columns: 110px 1fr;
   grid-template-areas:
@@ -763,7 +805,12 @@ body.is-pressing #cursor-flower {
 
 /* --- 8c. Stat grid (dark, "the graph" background) --- */
 .about-stats {
-  padding: var(--space-5) 0;
+  /* Not part of the topic-break gap — .about-intro's own margin-bottom
+     above already owns that (144px). This is purely this dark band's own
+     internal breathing room around its content — doubled to --space-8
+     (96px) per feedback, so no longer matching .stat-feature's --space-4
+     elsewhere. */
+  padding: var(--space-8) 0;
 }
 
 .about-stats__grid {
@@ -800,6 +847,17 @@ body.is-pressing #cursor-flower {
   background: var(--color-green-dark);
   color: var(--color-cream);
 }
+/* Opt-in: the second CTA bar (before the footer) follows a light section
+   (.about-contact) and owns its own entrance via margin-top, matching
+   .project-cta's identical margin-top:var(--space-12) pattern — margin,
+   not padding, since this section has its own distinct background and
+   margin doesn't paint, so the true page-background shows through the
+   gap. Opt-in (not the base rule) because the FIRST cta-bar follows the
+   already-dark .about-stats — applying the same margin there would drop
+   a light-page-background stripe between two dark sections, which has no
+   established precedent on this site and needs a design call, not an
+   assumption; left alone for now. */
+.cta-bar--owns-entrance { margin-top: var(--space-12); }
 .cta-bar__inner {
   padding-top: var(--space-3);
   padding-bottom: var(--space-3);
@@ -823,7 +881,13 @@ body.is-pressing #cursor-flower {
 .fun-facts {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: var(--space-5) var(--space-2); /* horizontal: 24px on mobile, restored to 36px at tablet+ */
+  /* Top: --space-12 (144px) true topic break from the CTA bar above —
+     light section entering after a colored one, so it safely owns the
+     gap via its own padding-top (the default case, no color-bleed risk).
+     Bottom: 0 — .about-contact right after this owns THAT gap instead
+     (both light, so ownership is arbitrary; keeping one consistent owner
+     — "the entering element" — throughout this page rather than mixing). */
+  padding: var(--space-12) var(--space-2) 0;
 }
 
 .fun-facts__heading {
@@ -911,7 +975,13 @@ body.is-pressing #cursor-flower {
 .about-contact {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: var(--space-5) var(--space-2); /* horizontal: 24px on mobile, restored to 36px at tablet+ */
+  /* Top: --space-12 (144px) true topic break from .fun-facts above (both
+     light, entering element owns via padding-top, per the page's
+     consistent ownership rule). Bottom stays --space-5 — the CTA bar
+     right after this owns ITS OWN entrance via margin-top (below), so
+     this bottom value is just this section's own internal floor, not
+     part of that gap. */
+  padding: var(--space-12) var(--space-2) var(--space-5);
   min-height: 62vh; /* slightly reduced on mobile so this section + the CTA bar below both fit in one screen; restored to 70vh at tablet+ */
   display: flex;
   flex-direction: column;
@@ -941,7 +1011,7 @@ body.is-pressing #cursor-flower {
 .about-contact__heading .is-linkedin:hover {
   opacity: 0.85; /* -15%, keeps the same hue instead of swapping to the lighter token (too washed out to read) */
 }
-.about-contact__heading .is-email { color: var(--color-pink); }
+.about-contact__heading .is-email { color: var(--color-pink-dark); } /* dark variant on the light page background, per feedback */
 .about-contact__heading .is-linkedin { color: var(--color-green-dark); }
 .about-contact > p:last-child { font-size: 1rem; } /* Body tier: 16px, per STYLE.md */
 
@@ -993,9 +1063,13 @@ body.is-pressing #cursor-flower {
      owns the gap" pattern) because the generous whitespace above/below
      the centered content already comes from the vh-vs-content-height
      difference; padding here is just a floor for short/landscape
-     viewports where content nearly fills the box. */
-  min-height: 100vh;
-  min-height: 100dvh;
+     viewports where content nearly fills the box.
+     Subtracts the sticky header's real rendered height (93px below
+     1024px, 67px at 1024px+ — see .vertical-carousel for the same
+     measurement) so the hero fills exactly the space visible on load,
+     not the full screen height plus whatever the header covers. */
+  min-height: calc(100vh - 93px);
+  min-height: calc(100dvh - 93px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1004,6 +1078,18 @@ body.is-pressing #cursor-flower {
 .project-hero__inner {
   position: relative;
   z-index: 1;
+  /* .project-hero is display:flex (column), and .container's own
+     margin:0 auto sets auto margins on the cross axis (left/right, in a
+     column flex) — per the flexbox spec, auto cross-margins absorb
+     align-items:stretch instead of letting the item stretch, so without
+     an explicit width this shrank to whatever this page's OWN content
+     needed (a shorter tools/meta list = a narrower box) instead of
+     always filling up to .container's 1200px cap like every other use
+     of .container on the site. Confirmed as the cause of
+     breastfeeding-guide's hero reading narrower than the other project
+     pages, per feedback — width:100% forces the intended fill-to-cap
+     behavior regardless of this page's own content length. */
+  width: 100%;
 }
 .project-hero__heading {
   /* Hero tier, per feedback — same scale as .about-hero__heading, not
@@ -1027,7 +1113,7 @@ body.is-pressing #cursor-flower {
 .project-hero__tagline {
   font-size: 1.25rem; /* Body LG tier: 20px, per STYLE.md */
   line-height: 1.4;
-  max-width: 640px;
+  /* no max-width — should only wrap when the heading above it does, not independently */
 }
 
 /* --- 9c. Meta row (ROLE / COMPANY / TOOLS / YEAR) --- */
@@ -1075,6 +1161,17 @@ body.is-pressing #cursor-flower {
 }
 .project-gallery--pair { grid-template-columns: 1fr 1fr; }
 .project-gallery--trio { grid-template-columns: 1fr; }
+/* Opt-in exception to the "no object-fit" default above — this specific
+   image (a screenshotted LinkedIn post) runs taller than its two trio
+   siblings (print banner mockups), which threw its caption's baseline
+   below theirs. Cropped to the siblings' own aspect ratio (2161:2701),
+   trimming from the bottom (post's like/comment/repost bar) so the
+   header and group photo stay intact. */
+.project-gallery img.is-height-matched {
+  aspect-ratio: 2161 / 2701;
+  object-fit: cover;
+  object-position: top;
+}
 /* The last gallery before a true section break (currently: digital ads,
    right before the closing CTA) needs its own trailing margin zeroed —
    the CTA's padding-top owns that gap instead, per the spacing standard
@@ -1221,6 +1318,17 @@ body.is-pressing #cursor-flower {
 .project-section__copy > .project-section__heading + p {
   padding-left: 0;
 }
+/* Body copy colour, per feedback — forest, not the inherited body
+   default (--color-dark). Direct-child combinator (not a plain
+   descendant selector) for the same reason as the padding-left rule
+   above: .project-outcome__stats and .project-quote both nest deeper
+   inside .project-section__copy and carry their own explicit colour
+   treatment (stat text, quote text) — callouts/stats are excluded from
+   this, per feedback, and this selector shape excludes them
+   structurally rather than needing an override after the fact. */
+.project-section__copy > p:not(.project-eyebrow) {
+  color: var(--color-forest);
+}
 
 /* Real World Conditions: a dedicated 2-column x 2-row grid (not the
    shared eyebrow-column .project-section pattern — this section's layout
@@ -1248,6 +1356,13 @@ body.is-pressing #cursor-flower {
    this section only, not a global change to .project-section__heading. */
 .realworld-grid__copy .project-section__heading {
   margin-bottom: var(--space-1);
+}
+/* Body copy colour, per feedback — same forest treatment and
+   :not(.project-eyebrow) exclusion as .project-section__copy above (this
+   grid doesn't use that wrapper class, so it needs its own copy of the
+   rule); no stats/quote nest in here so no child-combinator is needed. */
+.realworld-grid__copy p:not(.project-eyebrow) {
+  color: var(--color-forest);
 }
 .realworld-grid__busfr,
 .realworld-grid__busen {
@@ -1301,7 +1416,10 @@ body.is-pressing #cursor-flower {
 }
 .project-outcome__stat p { font-size: 0.9rem; }
 .project-outcome__stat--green { --stat-color: var(--color-green-dark); }
-.project-outcome__stat--pink  { --stat-color: var(--color-pink); }
+/* Border/shape stays --color-pink; text explicitly overridden to
+   --color-pink-dark (better contrast on the light page background,
+   per feedback — pink text specifically, borders/shapes untouched). */
+.project-outcome__stat--pink  { --stat-color: var(--color-pink); --stat-text-color: var(--color-pink-dark); }
 .project-outcome__stat--olive {
   --stat-color: var(--color-green);
   --stat-text-color: var(--color-forest);
@@ -1332,7 +1450,7 @@ body.is-pressing #cursor-flower {
   margin-top: var(--space-1);
   font-style: normal;
   font-size: 0.875rem;
-  color: var(--color-green-dark);
+  color: var(--color-dark); /* per feedback */
 }
 
 /* --- 9h. Approach numbered list --- */
@@ -1350,14 +1468,14 @@ body.is-pressing #cursor-flower {
 .project-approach__number {
   font-size: 0.875rem;
   font-weight: 700;
-  color: var(--color-pink);
+  color: var(--color-pink-dark); /* dark variant on the light page background, per feedback */
 }
 .project-approach__list h3 {
   font-size: 1.3rem;
   letter-spacing: -0.024em;
   margin-bottom: 0.5rem;
 }
-.project-approach__list p { font-size: 0.9rem; line-height: 1.6; }
+.project-approach__list p { font-size: 1rem; line-height: 1.6; color: var(--color-forest); } /* body copy: 16px, per feedback — headings untouched */
 .project-approach__list a {
   color: var(--color-green-dark);
   text-decoration: underline;
@@ -1448,67 +1566,67 @@ body.is-pressing #cursor-flower {
    (full width for the video); desktop flanks the track with the arrows,
    dots centered underneath, matching the original two-arrow layout. */
 .video-carousel {
-  /* No forced full-screen height on mobile — the video's 4:5 portrait
-     aspect ratio is width-bound at narrow viewports (e.g. 390px wide
-     renders ~487px tall), well short of a full 100dvh mobile screen.
-     Forcing the section to 100dvh anyway just created a large unavoidable
-     gap above/below the video (letterboxing) that grew — not shrank —
-     when other spacing was tightened, since it was never really "margin"
-     controlling it, it was leftover space from the height/aspect
-     mismatch. Letting the section size to its own content on mobile
-     removes that gap outright. Full-viewport immersion is restored at
-     tablet+ (see media query), where a wider viewport plus a
-     side-by-side arrow layout make the video comfortably height-bound
-     instead, so the same forced-height technique doesn't create the same
-     problem there. */
-  /* No padding on either side — this section is dark/graph-textured, so
-     any padding here would just be more dark space, not a visible gap
-     (see .project-section--overview's padding-bottom above for the top
-     boundary, and Outcome's own padding-top for the bottom one — both
-     cream sections own their side of the gap for exactly this reason).
-     align-items:center below still centers the video block within the
-     FULL box height, so removing this padding doesn't lose the internal
-     breathing room above/below the video — that was already coming from
-     the centering, not the padding. */
+  /* Matches .vertical-carousel exactly (see there for the full reasoning):
+     min-height, not a hard height, on mobile — a fixed height plus the
+     grid's 1fr track risked the same overflow/broken-layout failure mode
+     there (1fr's content min-size winning over the intended shrink). Floor
+     of viewport-minus-header, free to grow if content needs more; the
+     .video-carousel__viewport padding-top/bottom below reserve the visible
+     dark-grid space above/below the video content. Tablet+ keeps a hard
+     height (see overrides below) since content comfortably fits either way.
+     display:flex with DEFAULT align-items (stretch), not align-items:center
+     — stretch sizes the single flex child (.video-carousel__viewport)
+     structurally to fill/grow with the container. align-items:center
+     instead relies on the child's height:100% resolving as a percentage,
+     which needs the container's height to be "definite" — min-height alone
+     never counts as definite per spec, so with center the child silently
+     fell back to content-sizing and got mis-centered as a shorter box
+     (confirmed via testing: broke the fixed-px padding math below).
+     position:absolute;inset:0 on the child was tried too, but that makes
+     the child unable to grow the min-height'd parent past its floor at
+     all (out-of-flow elements don't contribute to containing-block sizing)
+     — reintroducing the exact "tall content gets clipped" bug this min-
+     height/growable approach exists to prevent. Stretch is the only one
+     of the three that gets both properties right. */
+  min-height: calc(100vh - 93px);
+  min-height: calc(100dvh - 93px);
   padding: 0;
   display: flex;
-  align-items: center;
   overflow: hidden;
-}
-/* Mobile only: the section isn't forced to 100dvh here (see comment
-   above), so it sizes to its own content — padding-bottom here adds
-   real, visible dark space after the arrows/dots row rather than
-   fighting the tablet+ centering math. Per feedback, the pagination row
-   was sitting right at the section's bottom edge. */
-@media (max-width: 768px) {
-  .video-carousel {
-    padding-bottom: var(--space-2);
-  }
 }
 .video-carousel__viewport {
   width: 100%;
-  height: 100%;
+  /* No explicit height — align-items:stretch (the flex default on the
+     parent) only stretches a child whose own height is auto; setting a
+     percentage here would override stretch and reintroduce the same
+     indeterminate-percentage problem stretch exists to avoid. */
   display: grid;
   grid-template-columns: auto 1fr auto;
-  /* auto rows + align-content:center — .video-carousel__viewport has a
-     definite height:100% (matching the section's forced 100dvh), and
-     grid's align-content defaults to a stretch-like behaviour that
-     proportionally inflates "auto" tracks to fill a definite-height
-     container. That's what kept the caption-to-pagination gap wide even
-     after switching off the 1fr row: the auto row was still being
-     stretched taller than its actual content needed. align-content:center
-     stops the stretching (both rows sit at their real content height)
-     while still centering the whole track+controls block vertically in
-     the section, so the video doesn't shift to hug the top — any true
-     leftover viewport height splits evenly above/below the whole block
-     instead of inflating the row itself. */
-  grid-template-rows: auto auto;
+  /* Matches .vertical-carousel__viewport's pattern (breastfeeding-guide):
+     track fills remaining space and centers within it (align-items:center
+     on a 1fr row taller than the track's own content does this
+     automatically); prev/dots/next hugs the bottom via padding-bottom
+     instead of a fixed row-gap, so the gap between video and controls
+     scales with viewport height instead of staying constant. */
+  grid-template-rows: 1fr auto;
   grid-template-areas:
     "track track track"
     "prev  dots  next";
-  row-gap: 0.5rem; /* 8px — tighter than --space-1, per feedback ("again reduce") */
+  padding-bottom: var(--space-4); /* 48px from the bottom edge of the section */
   align-items: center;
-  align-content: center;
+}
+/* Mobile only — matches .vertical-carousel__viewport exactly: tablet+
+   already has generous natural top space from the 1fr row, mobile needs
+   an explicit reservation so the dark grid texture is visible above the
+   video instead of it sitting flush under the header. 24px (--space-2) on
+   both edges, not 48px — matches .container's own 24px mobile side
+   padding, so the carousel reads as a consistent frame on all four sides
+   instead of a heavier top/bottom than left/right. */
+@media (max-width: 768px) {
+  .video-carousel__viewport {
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+  }
 }
 .video-carousel__arrow {
   flex-shrink: 0;
@@ -1573,9 +1691,13 @@ body.is-pressing #cursor-flower {
 .video-carousel__caption {
   max-width: 340px;
   margin: var(--space-2) auto 0;
-  font-size: 0.75rem;
+  /* Labels tier (14px/440/0), per STYLE.md — was its own one-off
+     12px/0.02em combo, an accidental fork of the same caption pattern
+     used everywhere else on project pages (.project-gallery figcaption
+     etc.), simplified to match per feedback. */
+  font-size: 0.875rem;
   font-weight: 440;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--color-sand);
   text-align: left;
@@ -1670,7 +1792,7 @@ body.is-pressing #cursor-flower {
 }
 .project-cta__text .is-email:hover,
 .project-cta__text .is-linkedin:hover { opacity: 0.85; }
-.project-cta__text .is-email { color: var(--color-pink); }
+.project-cta__text .is-email { color: var(--color-pink-dark); } /* dark variant on the light page background, per feedback */
 .project-cta__text .is-linkedin { color: var(--color-green-dark); }
 
 .project-cta__top {
@@ -1750,7 +1872,7 @@ body.is-pressing #cursor-flower {
   line-height: 1.25;
   color: var(--color-dark);
 }
-.stat-feature__headline .is-pink { color: var(--color-pink); }
+.stat-feature__headline .is-pink { color: var(--color-pink-dark); } /* dark variant on the light sand background, per feedback */
 /* Locked line breaks — same technique as .project-hero-break: hidden
    (mobile wraps naturally at the smaller H4 size) until tablet+, where
    they're forced on so the headline always breaks "During the months /
@@ -1895,6 +2017,16 @@ body.is-pressing #cursor-flower {
 .video-feature {
   padding: var(--space-4) 0;
 }
+/* Shrink-wraps to the video's own rendered width (the video is the
+   widest child — the caption is a short one-liner) and centers that as
+   a unit via margin auto, so the caption below stays left-aligned to
+   the video's edge instead of the wider .container around it. Per
+   feedback: video centered, caption left-aligned within the video's
+   width, not the section's. */
+.video-feature__media {
+  width: fit-content;
+  margin: 0 auto;
+}
 .video-feature__video {
   display: block;
   max-width: 100%;
@@ -1902,17 +2034,19 @@ body.is-pressing #cursor-flower {
   max-height: 70dvh;
   width: auto;
   height: auto;
-  margin: 0 auto;
+  margin: 0;
   background: var(--color-dark);
 }
 .video-feature__caption {
-  /* No max-width (unlike .video-carousel__caption) — this video spans
-     the full container width, so the caption has plenty of room to sit
-     on one line instead of wrapping, per feedback. */
+  /* No max-width (unlike .video-carousel__caption) — the container itself
+     gives this caption plenty of room to sit on one line instead of
+     wrapping, per feedback. */
   margin: var(--space-2) 0 0;
-  font-size: 0.75rem;
+  /* Labels tier (14px/440/0), per STYLE.md — see .video-carousel__caption's
+     comment, same fork/fix. */
+  font-size: 0.875rem;
   font-weight: 440;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--color-sand);
   text-align: left;
@@ -2063,25 +2197,58 @@ body.is-pressing #cursor-flower {
    and the exit gap by the closing image's own margin-top
    (.full-bleed-image), same reasoning as everywhere else on this page. */
 .vertical-carousel {
-  height: 100vh;
-  height: 100dvh;
+  /* Section reads as too tall at 100vh/100dvh since the sticky header eats
+     into what's actually visible below it — subtract its real rendered
+     height (93px below 769px, 81px 769–1023px, 67px at 1024px+, per the
+     .site-header__inner/.site-header__brand overrides at each) so this
+     section matches the space actually visible on load, not the full screen.
+     min-height, not height, on mobile specifically — a hard height plus
+     the grid's 1fr track caused a real overflow/broken-layout bug in
+     Safari (the track's content min-size won out over the 1fr shrink,
+     blowing the section out) once the 2-column content + full text got
+     tall enough. min-height is a floor: section still fills the screen
+     when content is short, but grows instead of clipping/breaking when it
+     isn't. Tablet+ keeps a hard height (see overrides below) since the
+     2-column layout there comfortably fits either way.
+     display:flex with DEFAULT align-items (stretch), not align-items:center
+     — see .video-carousel for the full reasoning: stretch structurally
+     sizes the viewport child, while center+height:100% needs the
+     container's height to be "definite" (min-height alone never counts),
+     and position:absolute;inset:0 (also tried) can't grow a min-height'd
+     parent past its floor at all since out-of-flow elements don't
+     contribute to containing-block sizing. */
+  min-height: calc(100vh - 93px);
+  min-height: calc(100dvh - 93px);
   padding: 0;
   display: flex;
-  align-items: center;
   overflow: hidden;
 }
 .vertical-carousel__viewport {
   width: 100%;
-  height: 100%;
+  /* No explicit height — see .video-carousel__viewport for why (stretch
+     only stretches a child whose own height is auto). */
   display: grid;
   grid-template-columns: auto 1fr auto;
-  grid-template-rows: auto auto;
+  grid-template-rows: 1fr auto; /* track fills remaining space and centers within it; prev/dots/next hugs the bottom */
   grid-template-areas:
     "track track track"
     "prev  dots  next";
-  row-gap: var(--space-2); /* 24px, per feedback */
+  padding-bottom: var(--space-4); /* 48px from the bottom edge of the section, not from the content above it */
   align-items: center;
-  align-content: center;
+}
+/* Mobile only: at tablet+ the 1fr row already leaves generous natural
+   space above the content (the row is far taller than what the content
+   needs), so no explicit top padding is needed there — but on mobile the
+   content nearly fills the (now min-height, growable) box, leaving little
+   to no visible grid texture above it without an explicit reservation.
+   24px (--space-2) on both edges, not 48px — matches .container's own
+   24px mobile side padding (see .video-carousel__viewport's mobile rule
+   for the shared reasoning/align-self:start fix). */
+@media (max-width: 768px) {
+  .vertical-carousel__viewport {
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+  }
 }
 .vertical-carousel__arrow {
   flex-shrink: 0;
@@ -2173,6 +2340,207 @@ body.is-pressing #cursor-flower {
   }
 }
 
+/* --- 9j. View more — links to the site's other project pages, per
+   feedback. Sits between the closing CTA and the footer. Reuses
+   .project-card/.project-card__caption as-is for the image, hover
+   state, and typography, but is pinned to the MOBILE row layout
+   (thumbnail left, text right) at every width, including desktop —
+   "formatted similar to the mobile project links from the homepage,"
+   per feedback — rather than switching to the stacked image-on-top
+   layout every OTHER .project-card gets at 769px+ (see the responsive
+   section). Testing on mental-health-campaign.html first before this
+   goes on every project page. */
+.project-viewmore {
+  /* No margin-top of its own, per feedback — .project-cta right above it
+     already owns a padding-bottom (its "content-to-footer" tier) that
+     used to be the real gap before the footer; stacking this section's
+     own --space-12 margin-top on top of that doubled up into an
+     oversized gap. The divider (::before, painted at this box's own top
+     edge) now sits right at the end of that existing padding instead,
+     and padding-top alone spaces it from this section's heading. */
+  position: relative;
+  padding-top: var(--space-4);
+  /* This is now the last section before the footer — matches
+     .project-cta's own padding-bottom (its "content-to-footer" tier,
+     per that rule's comment) so the card row gets the same breathing
+     room before the footer that the CTA used to own on its own. */
+  padding-bottom: var(--space-4);
+}
+.project-viewmore::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--space-2);
+  right: var(--space-2);
+  border-top: 1px solid var(--color-sand);
+}
+@media (min-width: 769px) {
+  /* .project-section__copy is the grid's 1fr track — CSS Grid's
+     automatic minimum-size algorithm floors a track at its content's
+     own min-content width unless min-width is set, and the accordion's
+     flex row (flex:0 0 auto children, no shrinking) has a large
+     min-content since nothing in it is allowed to shrink. Without this,
+     the track was expanding past the "fair share" 1fr would otherwise
+     give it — wider than .container itself — which is what was pushing
+     the accordion off the right edge of the page on narrower "small
+     laptop" widths, per feedback, even after the cards' own widths were
+     already clamped down to fit. */
+  .project-viewmore .project-section__copy {
+    min-width: 0;
+  }
+}
+.viewmore-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2); /* 24px, per feedback — was --space-4/48px */
+  margin-top: var(--space-4);
+}
+@media (min-width: 769px) {
+  .viewmore-grid {
+    /* Cancels the mobile base rule's margin-top (meant to separate the
+       grid from the eyebrow when they're stacked) — once the shared
+       .project-section grid puts the eyebrow and this grid side by side
+       instead, that margin was pushing the cards down below the
+       eyebrow's own top edge instead of sitting inline with it, per
+       feedback. */
+    margin-top: 0;
+  }
+  /* Keeps the simple always-expanded row (image left, text right, one
+     per line — grid-template-columns stays the mobile base's single
+     1fr column) through the tablet/small-laptop range, undoing the
+     site-wide 769px+ .project-card switch to the stacked image-on-top
+     layout. The interactive multi-column accordion only turns on at
+     1024px+ below, once there's reliably enough width for 3 cards side
+     by side — a single column of full-width rows can never overflow
+     horizontally no matter how narrow the content column gets, so this
+     tier is the safe fallback for exactly the "small laptop" range
+     that was overflowing before, per feedback. */
+  .viewmore-grid .project-card {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .viewmore-grid .project-card img {
+    width: 170px;
+    height: auto;
+  }
+  .viewmore-grid .project-card__caption {
+    margin-top: 0;
+  }
+}
+@media (min-width: 1024px) {
+  /* Accordion strip, per feedback — replaces the simple row above once
+     there's enough width. Every card sits at its natural (image-only)
+     width except one, which is wider and reveals a text info panel
+     beside its image; hovering a different card expands that one
+     instead, and the row falls back to its default-expanded card when
+     nothing is hovered. flex (not grid) because each card's width is
+     driven by its own content (a fluid image + a caption that's 0 or
+     its own fluid width), not an even division of the row.
+     Image/caption widths are clamp()'d (not fixed px) so the whole
+     strip scales down smoothly on narrower "small laptop" widths
+     instead of overflowing — tuned so 3 cards (2 collapsed + 1
+     expanded) still fit within the content column's available width
+     (.container's 1200px cap minus the 220px eyebrow column minus its
+     gap) at this breakpoint's own 1024px floor, with a bit of margin,
+     per feedback. */
+  .viewmore-grid {
+    display: flex;
+    align-items: stretch;
+    gap: var(--space-1);
+  }
+  .viewmore-grid .project-card {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    /* Cancels the 769px tier's gap:var(--space-2) (the simple row
+       layout's own image-to-text spacing) — left in place, it added an
+       untracked extra 24px inside every card here, which was exactly
+       the gap between this fix's calculated widths and the overflow
+       still showing on narrow "small laptop" widths, per feedback. The
+       expanded caption's own padding provides the image-to-text gap in
+       this layout instead. */
+    gap: 0;
+    overflow: hidden;
+    border: 2px solid transparent;
+    box-shadow: none;
+    /* Overrides the site-wide .project-card:hover treatment below — the
+       border/shadow highlight lives on the whole card here (image +
+       info panel together), not just the image, since expanding also
+       reveals the info panel inside the same highlighted box. */
+    transition: border-color 0.35s ease, box-shadow 0.35s ease, width 0.35s ease;
+  }
+  .viewmore-grid .project-card img {
+    width: clamp(125px, 13vw, 170px);
+    height: auto;
+    aspect-ratio: 360 / 518;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: none;
+    box-shadow: none;
+  }
+  .viewmore-grid .project-card__caption {
+    width: 0;
+    /* Cancels the general .project-card__caption rule's min-width:100%
+       (added for the stacked desktop layout elsewhere, so a long title
+       matches the image's width instead of overflowing it) — that rule
+       doesn't know about this accordion's own width transition and was
+       forcing this panel to 100% of the row regardless, per feedback. */
+    min-width: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 0;
+    padding: 0;
+    background: var(--color-cream);
+    transition: width 0.35s ease, padding 0.35s ease;
+  }
+  /* Flex items default to min-width:auto, which for a text element means
+     "never shrink below your own unwrapped single-line width" — without
+     this, the title just overflowed the expanded panel instead of
+     wrapping, per feedback. */
+  .viewmore-grid .project-card__caption h3,
+  .viewmore-grid .project-card__caption p {
+    min-width: 0;
+  }
+  /* Cancels the shared .project-card:hover treatment (dark border/yellow
+     shadow on the image alone, yellow highlight behind the heading) —
+     both move to the card-level rules below instead, and the reference
+     for this expanded state has no highlight strip behind the text. */
+  .viewmore-grid .project-card:hover img {
+    border-color: transparent;
+    box-shadow: none;
+  }
+  .viewmore-grid .project-card:hover .project-card__caption h3 {
+    background-color: transparent;
+    padding: 0;
+  }
+  .viewmore-grid .project-card.is-expanded,
+  .viewmore-grid .project-card:hover {
+    border-color: var(--color-dark);
+    box-shadow: 5px 5px 0 var(--color-yellow);
+  }
+  .viewmore-grid .project-card.is-expanded .project-card__caption,
+  .viewmore-grid .project-card:hover .project-card__caption {
+    width: clamp(205px, 21.3vw, 280px);
+    padding: 0 var(--space-3);
+  }
+  /* Only one card expanded at a time: whichever is hovered wins, and the
+     default-expanded card (.is-expanded) collapses back while something
+     else is hovered. Un-hovering anywhere in the row returns to the
+     default. */
+  .viewmore-grid:has(.project-card:hover) .project-card.is-expanded:not(:hover) {
+    border-color: transparent;
+    box-shadow: none;
+  }
+  .viewmore-grid:has(.project-card:hover) .project-card.is-expanded:not(:hover) .project-card__caption {
+    width: 0;
+    padding: 0;
+  }
+}
+
 /* =====================================================
    10. LIGHTBOX — click a photo-strip image to view it large,
    at its natural aspect ratio
@@ -2210,23 +2578,681 @@ body.is-pressing #cursor-flower {
 }
 
 /* =====================================================
-   11. RESPONSIVE — mobile-first
-   Breakpoints: mobile ≤480, tablet ≤768, desktop 1024+
+   11. HOME PAGE
    ===================================================== */
 
+/* --- 11a. Hero — dark "graph" bg + layered gradient-glow headline --- */
+.home-hero {
+  /* Full-viewport, matching the header-height subtraction technique used
+     on project pages (.project-hero/.vertical-carousel/.video-carousel) —
+     93px below 769px, 81px 769–1023px, 67px at 1024px+, see those for the
+     full reasoning. min-height (not height) so it can still grow if
+     content ever needs more room. */
+  position: relative;
+  min-height: calc(100vh - 93px);
+  min-height: calc(100dvh - 93px);
+  padding: var(--space-9) 0 var(--space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+/* Film-grain texture, per feedback — an inline SVG feTurbulence noise
+   tile (no image asset/JS needed) as a ::after, not ::before, so it
+   paints on top of the heading/scroll-cue rather than behind them (an
+   unpositioned ::before would insert before — i.e. visually under — the
+   other children in paint order; ::after inserts after/on top). overlay
+   blend + low opacity keeps it a subtle grit rather than visible static.
+   The position jitters between a handful of offsets on a stepped timing
+   function (not eased) so it reads as flickering film noise rather than
+   a smoothly sliding texture — classic CSS film-grain technique. */
+.home-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.16; /* down from 0.28 — that was reading as a grey wash over the whole hero, not grain */
+  /* screen, not overlay — overlay's math collapses toward the backdrop
+     when the backdrop is dark (result ≈ 2×backdrop×source, and this
+     hero's backdrop is near-black), which was silently suppressing the
+     noise almost entirely regardless of opacity. screen (1-(1-backdrop)
+     ×(1-source)) fully preserves the noise's own brightness even at a
+     near-zero backdrop — the standard technique for grain over a dark
+     background. */
+  mix-blend-mode: screen;
+  /* Dialed back again per feedback ("greying out the content"): dropped
+     numOctaves 4→2 (the extra octaves were producing a regular woven-
+     fabric-like structure, not organic grain) and raised the gamma
+     exponent 2.4→3.2 so more of the tile stays black — black is a no-op
+     under screen — instead of mid-grey wash. feColorMatrix still
+     desaturates (fractalNoise randomizes each RGB channel independently,
+     which reads as colour tint once contrast is pushed) so it stays
+     neutral grey/white like a real film scan. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch' result='grain'/%3E%3CfeColorMatrix in='grain' type='saturate' values='0' result='mono'/%3E%3CfeComponentTransfer in='mono'%3E%3CfeFuncR type='gamma' exponent='3.2' amplitude='1' offset='0'/%3E%3CfeFuncG type='gamma' exponent='3.2' amplitude='1' offset='0'/%3E%3CfeFuncB type='gamma' exponent='3.2' amplitude='1' offset='0'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 260px 260px;
+  animation: home-hero-grain 0.6s steps(4) infinite;
+}
+/* CRT scanlines + vignette, layered on a separate real element (not
+   folded into the grain ::after) so they stay static while the grain
+   above jitters — real scanlines don't drift, only the film grain does.
+   A plain last-child div, not another pseudo-element: ::after is always
+   painted last regardless of source order, so this only needs to come
+   after the heading/scroll-cue in the markup to sit above them, same
+   paint-order logic the grain ::after's own comment documents. Together
+   with the grid background already on this section, this is what reads
+   as 80s/90s CRT-tech rather than just "a dark hero with noise." */
+.home-hero__scanlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(to bottom,
+      rgba(0, 0, 0, 0.28) 0px,
+      rgba(0, 0, 0, 0.28) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(0, 0, 0, 0.45) 100%);
+}
+/* Fixed px offsets, not % — % on a translate is relative to THIS
+   element's own box (the full hero, 1000px+ tall), not the 260px noise
+   tile, so what looked like a small jitter was actually shifting the
+   tile by 15-25px per step: more than a tenth of the tile's own size,
+   large enough to visibly "jump" and reveal the repeating tile edges
+   (per feedback). A few px is still a full tile-widths' worth of jitter
+   at the noise's own grain-sized detail, without moving so far the
+   pattern visibly resets. */
+@keyframes home-hero-grain {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-3px, 2px); }
+  50%  { transform: translate(2px, -2px); }
+  75%  { transform: translate(-2px, -3px); }
+  100% { transform: translate(0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-hero::after { animation: none; }
+}
+/* Grid texture scales up with viewport too, per feedback — same fluid
+   technique as the heading font-size above, so the pattern stays
+   visually proportionate next to the now-much-larger hero text instead
+   of reading as tiny/dense on a big screen. Two separate length clamps
+   (cell size, stroke width) rather than a single unitless multiplier —
+   CSS calc()/clamp() can't add a unitless number to a vw length (a type
+   mismatch that silently invalidates the whole declaration, which is
+   what an earlier --grid-scale-multiplier version of this hit: the
+   background-image/background-size came out as none/auto with no
+   console warning). Both clamps run from .bg-graph's shared default
+   (30px cells, 0.5px stroke) up to 1.6x that (48px, 0.8px) across the
+   same 375–1024px range as the heading, then hold flat. Scoped to only
+   this section for now (not the shared .bg-graph rule itself, which
+   STYLE.md documents as a fixed 30px everywhere else — footer, About
+   stats, project carousels) — per feedback, extending this to the rest
+   of the site is a later step, not this one. */
+.home-hero.bg-graph {
+  --grid-cell: clamp(30px, 19.6px + 2.774vw, 48px);
+  --grid-stroke: clamp(0.7px, 0.458px + 0.0647vw, 1.12px); /* was 0.5–0.8px, scaled up ~1.4x per feedback (grain still wasn't reading, tried a heavier grid instead) */
+  background-size: var(--grid-cell) var(--grid-cell);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.10) var(--grid-stroke), transparent var(--grid-stroke)),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.10) var(--grid-stroke), transparent var(--grid-stroke));
+}
+.home-hero__heading {
+  position: relative;
+  margin: 0 auto;
+  /* Fluid, per feedback — scales continuously with viewport width instead
+     of jumping between fixed sizes at a breakpoint, but never below the
+     mobile floor (4.25rem, confirmed against home-mobile.jpg) or above
+     the desktop ceiling (6.5rem, confirmed against home-desktop.jpg).
+     Formula reaches exactly 4.25rem at 375px and exactly 6.5rem at
+     1024px, linearly in between (standard fluid-type clamp math: slope =
+     (6.5-4.25)/(1024px-375px) = ~5.546vw, intercept solves for the
+     4.25rem value at 375px). Past 1024px the clamp ceiling holds it flat
+     at 6.5rem, same as the old fixed desktop value.
+     Line-COUNT (4 lines mobile vs 2 desktop) is now handled independently
+     via .home-hero__break in the markup, not by wrapping against a
+     max-width cap — the two were coupled before, which doesn't hold up
+     under continuous font-size scaling (a wider/narrower cap interacting
+     with a constantly-changing font-size doesn't reliably land on 2 or 4
+     lines, only accidentally at the old fixed sizes). No max-width here
+     any more; nothing to constrain now that line breaks are explicit. */
+  font-size: clamp(4.25rem, 2.95rem + 5.546vw, 6.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.0417em; /* Hero tier: -3px at 72px, expressed as em, per STYLE.md */
+}
+/* Explicit line-break control, decoupled from font-size — shown (mobile/
+   tablet, 4-line layout) by default, hidden (desktop, 2-line layout) at
+   1024px+ below. The one PERMANENT <br> in the markup (between "without"
+   and "empathy") always fires at every size; these two are the only ones
+   that toggle. */
+.home-hero__break { display: inline; }
+/* The real (accessible) text plus one soft glow duplicate share the same
+   gradient-clipped look — per feedback, brought back smaller/subtler
+   than the original spec (STYLE.md's old two-layer, 50px-blur recipe):
+   one layer, a modest 12px blur, moderate opacity, so it reads as a
+   gentle glow rather than a halo competing with the text or the
+   chromatic-aberration fringe below. */
+.home-hero__heading-text,
+.home-hero__heading-glow {
+  display: block;
+  /* Exact colors/stops confirmed against the PRD's dedicated gradient
+     reference (Screenshot_2026-07-26_at_6.10.33_PM.png) — the actual
+     Figma gradient panel: #C6D4E1 46%, #FD8EBD 54%, #BBC48F 66%,
+     #FDA24B 99%, remapped proportionally onto 0–100% for a linear sweep.
+     Figma's gradient there is "Angular" (conic), but reproducing that
+     literally as a CSS conic-gradient centered near a two-line, natural-
+     wrap heading created a visible seam/swirl where the two lines' angles
+     diverge — a fixed-frame Figma export doesn't have that problem, but
+     live-wrapping HTML text does. Linear, at 90deg, gives the same left-
+     to-right color sequence without the artifact. */
+  background: linear-gradient(90deg,
+    #C6D4E1 0%, /* no matching token — this exact blue-grey is unique to this gradient's Figma stops */
+    var(--color-pink-light) 15%,
+    var(--color-green-light) 38%,
+    #FDA24B 100% /* no matching token — close to but not exactly --color-yellow (#FDAF04) */
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* Ambient glow: small and subtle by default, per feedback. Flares up on
+   hover — the blurred-halo look from a glitch/glow reference image,
+   applied as an interaction rather than a constant effect — via a smooth
+   eased transition (not a snap or a stepped/choppy animation) on both
+   blur radius and opacity. */
+.home-hero__heading-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: hard-light;
+  filter: blur(12px);
+  opacity: 0.5;
+  transition: filter 0.4s ease, opacity 0.4s ease;
+}
+.home-hero__heading:hover .home-hero__heading-glow {
+  filter: blur(28px);
+  opacity: 0.85;
+}
+
+/* Chromatic-aberration / RGB-split effect, per feedback (inspired by a
+   glitch-text reference, "GLOW" — a duotone fringe around the
+   letterforms) — two more aria-hidden duplicate layers, same positioning
+   technique as the glow layer above, but clipped to flat colours instead
+   of the rainbow gradient (a true colour-channel split reads as solid
+   fringes at the letter edges, not another gradient). Uses the site's
+   own palette (pink + yellow, both already gradient stops elsewhere on
+   this heading) rather than literal red/cyan. Static offset, no
+   animation — an earlier drifting version read as unwanted constant
+   motion, per feedback ("don't like the movement"); the fringe itself
+   stays, it just doesn't move. screen blend mode is what makes the
+   overlap read as near-white at each glyph's center while still showing
+   a visible colour fringe at the edges — the same optical mechanism as a
+   real lens's chromatic aberration. */
+.home-hero__heading-glitch {
+  display: block;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  mix-blend-mode: screen;
+}
+.home-hero__heading-glitch--pink {
+  /* background-color, not the background shorthand — the shorthand
+     resets every background-* longhand it doesn't mention (including
+     background-clip) back to its initial value, which was silently
+     undoing the base rule's background-clip:text and rendering this as
+     a solid box instead of clipped-to-text (confirmed via
+     getComputedStyle: backgroundClip came back "border-box"). */
+  background-color: var(--color-pink);
+  opacity: 0.75;
+  transform: translate(-4px, 2px);
+}
+.home-hero__heading-glitch--yellow {
+  background-color: var(--color-yellow); /* background-color, not the shorthand — see .home-hero__heading-glitch--pink's comment */
+  opacity: 0.75;
+  transform: translate(4px, -2px);
+}
+
+.home-hero__scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 48px;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  color: var(--color-pink-light);
+  cursor: none;
+  animation: home-hero-bounce 1.6s ease-in-out infinite;
+}
+.home-hero__scroll-cue svg { width: 100%; height: 100%; }
+@keyframes home-hero-bounce {
+  /* Combined with the element's own translateX(-50%) centering — a
+     keyframe's transform replaces the base value entirely rather than
+     composing with it, so both translations have to live here together. */
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-hero__scroll-cue { animation: none; }
+}
+
+/* --- 11b. Marquee — infinite-scroll discipline strip --- */
+.marquee {
+  overflow: hidden;
+  background: var(--color-pink); /* per feedback, was --color-green-light */
+  padding: 4px 0; /* 24px total band height, per feedback — 16px text (1rem @ line-height:1, see .marquee__track span below) + 4px top/bottom */
+}
+.marquee__track {
+  display: flex;
+  width: max-content;
+  gap: var(--space-6);
+  animation: marquee-scroll 26s linear infinite; /* slowed slightly from 22s, per feedback */
+}
+/* Second row scrolls the opposite direction — reusing the same
+   marquee-scroll keyframe (0% → -50%) via animation-direction:reverse
+   rather than writing a mirrored keyframe, since reversing playback of a
+   symmetric loop is visually identical to a "backwards" version of it.
+   Much slower than the top row and a green background, per feedback —
+   both distinguish it as a second, separate rhythm rather than reading
+   as a continuation of the row above. */
+.marquee--reverse {
+  background: var(--color-green);
+}
+.marquee--reverse .marquee__track {
+  animation-direction: reverse;
+  animation-duration: 160s; /* significantly slower, per feedback — was 55s */
+}
+/* Bottom row is a single repeating word, always emphasized — every span
+   is bold, not just one "current" one, so this is a track-level modifier
+   rather than the old single-word .is-current class. */
+.marquee--bold .marquee__track span {
+  font-weight: 700;
+}
+/* Hover pauses the scroll, per feedback — hovering the section (not just
+   the track) so moving over any word, gap, or divider keeps it paused. */
+.marquee:hover .marquee__track {
+  animation-play-state: paused;
+}
+.marquee__track span {
+  position: relative;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1; /* was the browser default (~1.4-1.5) — that alone was most of the old ~78px band height */
+  /* Eyebrow tier weight (600), per STYLE.md — was 500, an accidental
+     near-miss of Eyebrow given this already shares its 16px size and
+     0.0625em letter-spacing; simplified to match exactly, per feedback. */
+  font-weight: 600;
+  letter-spacing: 0.0625em;
+  text-transform: uppercase;
+  color: var(--color-cream); /* light text, per feedback — was --color-forest */
+  white-space: nowrap;
+}
+/* Thin vertical divider between words, confirmed against both reference
+   images — centered in the gap to this word's left, skipped on the very
+   first word (which has no predecessor). */
+.marquee__track span:not(:first-child)::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--space-6) / -2);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 1em;
+  background: var(--color-cream);
+}
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); } /* content is duplicated exactly once, so -50% is a seamless loop */
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee__track { animation: none; }
+}
+
+/* --- 11c. Project scroller — horizontal on desktop, vertical stack on
+   mobile, per PRD ("Horizontal scrolling: Home page, through the featured
+   project cards... sized down to mobile cards stack vertically"). Native
+   overflow scroll, not JS/arrows — manual, no snap-to-fight-the-user. */
+.project-scroller {
+  /* Section-spacing standard (var(--space-12), owned by the entering
+     element's padding-top) applied site-wide, per feedback — same rule
+     project pages already use for topic-to-topic breaks. */
+  padding: var(--space-12) var(--space-2) var(--space-2);
+}
+.project-scroller__track {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2); /* 24px, per feedback — was --space-4/48px */
+}
+/* Intro-to-first-card gap stays the full 144px on mobile even though the
+   other card-to-card gaps are 24px, per feedback — adds the extra 120px
+   on top of the track's own 24px gap (120+24=144) rather than raising
+   the track gap itself (which would re-widen every other gap too).
+   Reset at 769px+ below, where the row layout's own align-items:flex-
+   start would otherwise read this as a vertical offset instead of
+   horizontal spacing. */
+.intro-card + .project-card {
+  margin-top: var(--space-10);
+}
+
+/* Intro card: per the mobile reference this is PLAIN text on mobile — no
+   box, border, shadow, or dark background at all, just the eyebrow +
+   heading sitting directly on the page background. The full dark-card
+   treatment (box, border, shadow, arrow) is desktop-only — see the 769px
+   override below. */
+.intro-card {
+  display: block;
+  cursor: none;
+}
+.intro-card__eyebrow {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.0625em;
+  text-transform: uppercase;
+  color: var(--color-pink-dark); /* dark variant on this mobile treatment's light page background — the 769px+ override below switches to pink-light for the dark card background instead, so leave that one alone */
+}
+.intro-card__text {
+  margin-top: var(--space-2);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.375rem;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--color-dark);
+}
+.intro-card__arrow {
+  display: none; /* desktop-only, see 769px override */
+}
+
+/* Project card: mobile is a horizontal row (thumbnail left, title/type
+   right — per the mobile reference, not the stacked image-on-top layout
+   STYLE.md's Project Cards spec describes, which is the desktop
+   treatment). Desktop switches to the stacked layout at 769px+ below. */
+.project-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: none;
+}
+.project-card img {
+  display: block;
+  flex-shrink: 0;
+  width: 170px; /* measured against home-mobile.jpg */
+  aspect-ratio: 360 / 518;
+  object-fit: cover;
+  border: 2px solid transparent; /* reserves the hover border's space so nothing shifts on hover */
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+.project-card:hover img {
+  border-color: var(--color-dark);
+  box-shadow: 5px 5px 0 var(--color-yellow); /* was --color-yellow-light, per feedback */
+}
+.project-card__caption h3 {
+  /* inline, not the default block — the hover highlight below paints
+     this element's own box, and a block h3 always spans the FULL width
+     of its parent (which, since the caption column was widened to match
+     the image per feedback, is now wider than the title text itself),
+     so the highlight was reading as a wide bar instead of hugging just
+     the text. inline makes each wrapped line report its own tight box
+     instead, the same way a text selection highlight works. */
+  display: inline;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.25rem; /* Heading 6 tier: 20px, per STYLE.md */
+  letter-spacing: -0.03em;
+  color: var(--color-dark);
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+.project-card:hover .project-card__caption h3 {
+  background-color: rgba(253, 175, 4, 0.3); /* --color-yellow @ 30% — was --color-yellow-light, per feedback */
+  padding: 0 0.15em;
+}
+/* Two of the four project titles have a shorter mobile-specific wording
+   confirmed against the mobile reference (e.g. "Sexual Health Awareness"
+   vs desktop's "Provincial Sexual Health Awareness") — same show/hide-span
+   technique as .hero-break. */
+.project-card__title--long { display: none; }
+.project-card__title--short { display: inline; }
+.project-card__caption p {
+  margin-top: 0.25rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem; /* Labels tier: 14px */
+  font-weight: 440;
+  text-transform: uppercase;
+  color: var(--color-green-dark);
+}
+
+/* --- 11d. About teaser — photo + copy sit side by side at EVERY
+   breakpoint per the reference (not stacked-then-row); only the photo's
+   own shape/size changes: a small circular avatar on mobile, the same
+   square offset-shadow treatment as .about-intro__photo at desktop. */
+.home-about-teaser {
+  /* Section-spacing standard (var(--space-12), both top and bottom) —
+     per feedback, matches the standard topic-break value on both sides
+     rather than a smaller bottom value. */
+  position: relative;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-12) var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: left;
+}
+.home-about-teaser__photo {
+  flex-shrink: 0;
+  width: 72px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  overflow: hidden;
+  /* Same offset-shadow language as the desktop version below (green
+     top-left, pink bottom-right, no blur) instead of the old concentric
+     ring — box-shadow follows border-radius automatically, so this
+     renders as two circular offset copies behind the photo, per
+     feedback. */
+  box-shadow:
+    -4px -4px 0 0 var(--color-green),
+     4px  4px 0 0 var(--color-pink);
+}
+.home-about-teaser__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.home-about-teaser__copy p {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-dark);
+}
+.home-about-teaser__copy .link-btn {
+  display: inline-block;
+  margin-top: var(--space-2);
+}
+/* =====================================================
+   12. RESPONSIVE — mobile-first
+   Breakpoints: mobile ≤480, tablet ≤768, desktop 1024+
+
+   This section holds cross-component tablet/desktop overrides — anything
+   whose base rule already lives in its own component section above (6.
+   HEADER, 8. ABOUT, 9. PROJECT PAGE TEMPLATE, 11. HOME PAGE) gets its
+   responsive follow-up here instead, grouped by component under the
+   labeled dividers below, in the same top-to-bottom order as those
+   sections. Kept in one place (rather than split across every
+   component's own section) because most breakpoint changes here are
+   small, one-line overrides that don't carry enough surrounding context
+   to justify a full @media block of their own back where the base rule
+   lives — some larger, more self-contained components (the carousels,
+   .video-feature, etc.) still keep their own @media overrides colocated
+   with their base rules instead, which is why you'll also see @media
+   blocks scattered through sections 8/9/11 above, not just here.
+   ===================================================== */
+
+/* --- Header & Navigation: below 769px --- */
 .site-nav__links { display: none; }
 .hamburger { display: flex; }
 
+/* --- About page: below 769px --- */
 /* Mobile: one column for stat cards and the fun-facts grid. */
 .about-stats__grid { grid-template-columns: 1fr; }
 .fun-facts__grid { grid-template-columns: 1fr 1fr; }
 
 @media (min-width: 769px) {
   /* Tablet and up */
+
+  /* --- About page --- */
   .about-intro { grid-template-columns: 220px 1fr; }
   .fun-facts__grid { grid-template-columns: repeat(3, 1fr); }
   .about-intro__heading br { display: none; }
 
+  /* --- Home page --- */
+  /* Home: cards row goes horizontal (native scroll, not JS/arrows — the
+     PRD calls for manual scroll here, no snap, so it never fights a
+     trackpad/mouse-wheel gesture the way the snap-based carousels can).
+     Edge-to-edge (not aligned to .container's 1200px max-width) — per
+     feedback, "make more use of the horizontal spacing" rather than
+     matching the header/footer's centered-container edge. Trying this as
+     an experiment; easy to revert to the old max()-against---max-width
+     formula (see git history) if it doesn't read well.
+     --card-height is shared by .intro-card and .project-card img (below)
+     so they can't drift out of sync — "almost fill the vertical space of
+     the screen," per feedback. clamp()'s middle value (65vh) does the
+     actual scaling; the floor (440px) keeps cards usable on short/
+     landscape-phone viewports, the ceiling (720px) is a guessed starting
+     point for large/tall screens (feedback flagged this number as
+     uncertain — adjust freely). */
+  .project-scroller {
+    --card-height: clamp(440px, 65vh, 720px);
+    overflow-x: auto;
+    padding-bottom: var(--space-4);
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+  .project-scroller__track {
+    flex-direction: row;
+    /* Default align-items:stretch was forcing .intro-card to match
+       .project-card's TOTAL height (image + caption below it) instead of
+       just its own aspect-ratio — flex-start lets each card size to its
+       own content/aspect-ratio and top-aligns them instead. */
+    align-items: flex-start;
+    width: max-content;
+    gap: var(--space-1); /* 12px, per feedback */
+  }
+  .intro-card + .project-card {
+    margin-top: 0; /* mobile-only gap bump — row layout uses the track's own gap instead */
+  }
+  .project-card {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    /* Overrides the mobile base rule's gap:var(--space-2) (meant for the
+       horizontal row layout's img-to-text spacing there) — left unset,
+       it was stacking with .project-card__caption's own margin-top
+       below, doubling the effective image-to-caption gap to 48px instead
+       of the intended 24px. */
+    gap: 0;
+    /* Overrides the mobile base rule's align-items:center (meant to
+       vertically center the row's image against the text beside it) —
+       left unset, it was still applying at desktop's column layout too,
+       horizontally centering the (narrower, text-width) caption instead
+       of left-aligning it flush with the image's left edge above it. */
+    align-items: flex-start;
+  }
+
+  /* Intro card picks up the full dark-card treatment here — plain text
+     only below this breakpoint, see the base rule for why. Width isn't
+     set at all: aspect-ratio (360/518) derives it from height
+     automatically, same as .project-card img below. */
+  .intro-card {
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* all text vertically centered, per feedback — arrow is positioned separately below */
+    height: var(--card-height);
+    aspect-ratio: 360 / 518; /* exact match to .project-card img's own dimensions */
+    padding: var(--space-3);
+    /* Same background-color/image/size as .bg-graph — not applied via
+       that shared class since it would also leak onto the mobile plain-
+       text treatment above, which must stay on the page background. */
+    background-color: var(--color-grid);
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.10) 0.5px, transparent 0.5px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.10) 0.5px, transparent 0.5px);
+    background-size: 30px 30px;
+    /* Same offset-shadow language as .about-intro__photo (green top-left,
+       pink bottom-right) — no border, per feedback. */
+    box-shadow:
+      -6px -6px 0 0 var(--color-green),
+       6px  6px 0 0 var(--color-pink);
+  }
+  .intro-card__eyebrow { color: var(--color-pink-light); }
+  .intro-card__text { color: var(--color-green-light); }
+  .intro-card__arrow {
+    display: block;
+    position: absolute;
+    right: var(--space-3);
+    bottom: var(--space-3);
+    width: 28px;
+    height: 28px;
+    color: var(--color-green-light);
+  }
+  .intro-card__arrow svg { width: 100%; height: 100%; }
+
+  /* Project card switches from the mobile row layout to the stacked
+     image-on-top layout STYLE.md's Project Cards spec describes — the
+     display:flex/flex-direction:column that makes this work lives on the
+     earlier .project-card rule above (grouped with .intro-card's shared
+     height clamp), not here. */
+  .project-card img {
+    height: var(--card-height);
+    width: auto;
+  }
+  .project-card__caption {
+    margin-top: var(--space-2);
+    /* width:0 removes this from the card's own shrink-to-fit width
+       calculation (a flex column card with no explicit width normally
+       takes the widest child's own preferred size — with a long
+       unwrapped title that was the CAPTION, not the image, so the card
+       widened past the image and the title overflowed its right edge,
+       per feedback). min-width:100% then re-expands it to match
+       whatever width the image (the only remaining, definite-sized
+       child) actually resolved to, so the title wraps within the
+       image's own width instead of escaping past it. */
+    width: 0;
+    min-width: 100%;
+  }
+  .project-card__title--long { display: inline; }
+  .project-card__title--short { display: none; }
+
+  /* Home: about-teaser photo grows and switches from a small circular
+     avatar to the square offset-shadow treatment shared with
+     .about-intro__photo. */
+  .home-about-teaser {
+    max-width: 1000px; /* per feedback, was 800px */
+    margin: 0 auto; /* centered, per feedback */
+    gap: var(--space-6);
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+  .home-about-teaser__photo {
+    width: 220px;
+    aspect-ratio: auto;
+    border-radius: 0;
+    overflow: visible;
+    border: none;
+    box-shadow:
+      -6px -6px 0 0 var(--color-green),
+       6px  6px 0 0 var(--color-pink);
+  }
+  .home-about-teaser__copy p {
+    font-size: 1.25rem; /* Body LG tier */
+    line-height: 1.4;
+  }
+
+  /* --- About page --- */
   .cta-bar__inner {
     flex-direction: row;
     align-items: center;
@@ -2234,8 +3260,10 @@ body.is-pressing #cursor-flower {
     flex-wrap: wrap;
   }
 
-  /* Side margins restored to 36px — the 24px mobile value is too tight
-     once there's more room to work with. */
+  /* --- Shared: side margins restored to 36px at tablet+ (the 24px mobile
+     value is too tight once there's more room to work with) — spans
+     .container itself plus every page-specific wrapper that doesn't
+     inherit it directly (About, footer, project-page CTA). --- */
   .container,
   .about-intro,
   .fun-facts,
@@ -2252,6 +3280,12 @@ body.is-pressing #cursor-flower {
     left: var(--space-3);
     right: var(--space-3);
   }
+  .project-viewmore::before {
+    left: var(--space-3);
+    right: var(--space-3);
+  }
+
+  /* --- Header & Navigation --- */
   .site-header__inner {
     /* Top/bottom shouldn't scale with the much-larger side margin here —
        half of it reads right, per feedback. */
@@ -2259,6 +3293,26 @@ body.is-pressing #cursor-flower {
     padding-bottom: calc(var(--space-3) / 2);
   }
 
+  /* --- Shared: full-viewport sections' header-height subtraction
+     (Project pages + Home page) — see each base rule (sections 9b, 9j,
+     11a) for the full "why calc(100vh - Npx)" reasoning; this tier just
+     updates the pixel value to match the header's real height at this
+     breakpoint (81px, per the .site-header__inner padding change just
+     above) — a further 1024px+ tier follows below. --- */
+  .project-hero {
+    min-height: calc(100vh - 81px);
+    min-height: calc(100dvh - 81px);
+  }
+  .vertical-carousel {
+    height: calc(100vh - 81px);
+    height: calc(100dvh - 81px);
+  }
+  .home-hero {
+    min-height: calc(100vh - 81px);
+    min-height: calc(100dvh - 81px);
+  }
+
+  /* --- About page --- */
   /* Photo grid stays inset with its original gap from here up (only
      mobile gets the flush-edge-to-edge treatment). */
   .photo-strip {
@@ -2285,10 +3339,13 @@ body.is-pressing #cursor-flower {
 
   /* Full-viewport immersion restored here (see .video-carousel's base
      rule for why it's dropped on mobile) — no padding at this breakpoint
-     either (see the base rule for why). */
+     either (see the base rule for why). Subtracts the sticky header's
+     81px height at this width (67px override at 1024px+, below) so the
+     section fills exactly the space visible on load — see
+     .vertical-carousel for the same measurement/reasoning. */
   .video-carousel {
-    height: 100vh;
-    height: 100dvh;
+    height: calc(100vh - 81px);
+    height: calc(100dvh - 81px);
   }
 
   .realworld-grid {
@@ -2322,6 +3379,17 @@ body.is-pressing #cursor-flower {
   }
   .project-section .project-eyebrow { margin-bottom: 0; }
   .project-section__copy { grid-column: 2; }
+  /* Cancels .project-approach__list's own 36px margin-top (needed on
+     mobile, where the list stacks below the eyebrow) once the grid
+     column split puts them side by side instead — without this the
+     list's first heading sat 36px below the Approach eyebrow instead of
+     lining up with it, per feedback. Scoped to :first-child — some
+     Approach sections (e.g. mental-health-campaign's) have their own
+     intro heading/paragraph before the list, and zeroing the margin
+     unconditionally there removed the gap between that intro copy and
+     "01" entirely, reading as cramped. Only the myhealthnb-launch case
+     (list is the copy block's only/first content) needs this zeroed. */
+  .project-section__copy > .project-approach__list:first-child { margin-top: 0; }
 
   /* Paragraph indent (see mobile-only rule above) doesn't apply once the
      grid column split itself provides the offset. Selector must match
@@ -2337,10 +3405,18 @@ body.is-pressing #cursor-flower {
 
 @media (min-width: 1024px) {
   /* Desktop */
+
+  /* --- About page --- */
   .about-hero__heading { font-size: 4.5rem; }
   .about-hero__heading .hero-break { display: inline; }
 
+  /* --- Home page --- */
+  /* Font-size no longer jumps here — the base rule's clamp() already
+     reaches 6.5rem exactly at this width and holds flat above it. Only
+     the line-break STRUCTURE changes here: collapse from 4 lines to 2. */
+  .home-hero__break { display: none; }
 
+  /* --- Header & Navigation --- */
   /* Back to a single inline row: name, icon, tagline (natural DOM order) */
   .site-header__brand {
     display: flex;
@@ -2348,6 +3424,28 @@ body.is-pressing #cursor-flower {
     gap: 0.5rem;
   }
 
+  /* --- Shared: full-viewport sections' header-height subtraction
+     (Project pages + Home page) — header shrinks again to 67px here
+     (brand collapses to one row, just above); same reasoning as the
+     769px tier, just a smaller pixel value. --- */
+  .project-hero {
+    min-height: calc(100vh - 67px);
+    min-height: calc(100dvh - 67px);
+  }
+  .vertical-carousel {
+    height: calc(100vh - 67px);
+    height: calc(100dvh - 67px);
+  }
+  .video-carousel {
+    height: calc(100vh - 67px);
+    height: calc(100dvh - 67px);
+  }
+  .home-hero {
+    min-height: calc(100vh - 67px);
+    min-height: calc(100dvh - 67px);
+  }
+
+  /* --- About page --- */
   .about-intro {
     grid-template-columns: 260px 1fr;
     grid-template-areas:
@@ -2361,8 +3459,10 @@ body.is-pressing #cursor-flower {
 
   .about-stats__grid { grid-template-columns: 1fr 1fr; }
 
+  /* --- Project page template --- */
   .project-meta { grid-template-columns: repeat(4, 1fr); }
 
+  /* --- About page --- */
   /* Photo mosaic switches from the 3x3 mobile/tablet layout to the
      6-column x 2-row desktop layout — see about-desktop.jpg. */
   .photo-strip {
@@ -2374,9 +3474,11 @@ body.is-pressing #cursor-flower {
       "paris jump    storr storr cafe      blossoms";
   }
 
+  /* --- Header & Navigation --- */
   .site-nav__links { display: flex; }
   .hamburger { display: none; }
 
+  /* --- Footer --- */
   /* Links vertically centered against the logo (x-position unchanged —
      still space-between), per feedback. */
   .site-footer__top { align-items: center; }
