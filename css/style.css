@@ -141,6 +141,27 @@ button:focus-visible,
   border-radius: 2px;
 }
 
+/* Skip-to-content link — invisible until keyboard-focused, lets keyboard
+   users jump past the repeated header/nav straight to <main> instead of
+   tabbing through it on every page. */
+.skip-link {
+  position: absolute;
+  top: var(--space-1);
+  left: var(--space-1);
+  z-index: 1000;
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-dark);
+  color: var(--color-cream);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  text-decoration: underline;
+  transform: translateY(-150%);
+  transition: transform 200ms ease-in-out;
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+
 /* =====================================================
    3. "THE GRAPH" — shared grid-pattern background
    0.5px white stroke, 30px cells, 10% opacity, on --color-grid
@@ -443,6 +464,25 @@ body.is-pressing #cursor-flower {
 }
 .link-btn--light:hover { color: var(--color-sand); }
 .link-btn--light:active { color: var(--color-yellow-light); }
+
+/* --- 404 page: centered message, default cream/dark body colours --- */
+.not-found {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-2);
+}
+.not-found h1 {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  max-width: 20ch;
+}
+.not-found__body {
+  max-width: 40ch;
+}
 
 /* =====================================================
    6. HEADER / NAVIGATION
