@@ -146,7 +146,7 @@
           <div class="video-carousel__slides">
             <div class="video-carousel__slide is-active">
               <div class="video-ui">
-                <video src="/assets/sexual-health-campaign/social1.mp4" muted loop playsinline></video>
+                <video src="/assets/sexual-health-campaign/social1.mp4" preload="none" muted loop playsinline></video>
                 <div class="video-ui__flash" aria-hidden="true">
                   <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
                   <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"></path></svg>
@@ -156,7 +156,7 @@
             </div>
             <div class="video-carousel__slide">
               <div class="video-ui">
-                <video src="/assets/sexual-health-campaign/social2.mp4" muted loop playsinline></video>
+                <video src="/assets/sexual-health-campaign/social2.mp4" preload="none" muted loop playsinline></video>
                 <div class="video-ui__flash" aria-hidden="true">
                   <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
                   <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"></path></svg>
@@ -166,7 +166,7 @@
             </div>
             <div class="video-carousel__slide">
               <div class="video-ui">
-                <video src="/assets/sexual-health-campaign/social3.mp4" muted loop playsinline></video>
+                <video src="/assets/sexual-health-campaign/social3.mp4" preload="none" muted loop playsinline></video>
                 <div class="video-ui__flash" aria-hidden="true">
                   <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
                   <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"></path></svg>
@@ -176,7 +176,7 @@
             </div>
             <div class="video-carousel__slide">
               <div class="video-ui">
-                <video src="/assets/sexual-health-campaign/horizontal-vid.mp4" muted loop playsinline></video>
+                <video src="/assets/sexual-health-campaign/horizontal-vid.mp4" preload="none" muted loop playsinline></video>
                 <div class="video-ui__flash" aria-hidden="true">
                   <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
                   <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"></path></svg>
@@ -375,7 +375,7 @@
   </footer>
 
   <!-- Lightbox — shared across all photo/carousel triggers -->
-  <div id="lightbox" aria-hidden="true">
+  <div id="lightbox" role="dialog" aria-modal="true" aria-label="Image preview" aria-hidden="true">
     <button id="lightbox__close" aria-label="Close">&times;</button>
     <img id="lightbox__img" src="" alt="">
   </div>

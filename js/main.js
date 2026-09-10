@@ -156,35 +156,64 @@
     });
   }
 
-  /* --- Lightbox: click a photo to view it large at its natural ratio --- */
+  /* --- Lightbox: click (or keyboard-activate) a photo to view it large
+     at its natural ratio. #lightbox carries role="dialog"/aria-modal in
+     the markup; this wires up the matching behaviour — focus moves to
+     the close button on open, Tab is trapped inside the dialog (its only
+     focusable descendant is that same button), and focus returns to
+     whichever thumbnail opened it on close, so keyboard/screen-reader
+     users aren't dropped into the page behind it. */
 
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightbox__img');
   const lightboxClose = document.getElementById('lightbox__close');
+  let lightboxTrigger = null;
 
-  function openLightbox(src, alt) {
+  function openLightbox(src, alt, trigger) {
     if (!lightbox) return;
     lightboxImg.src = src;
     lightboxImg.alt = alt || '';
     lightbox.classList.add('is-open');
     lightbox.setAttribute('aria-hidden', 'false');
+    lightboxTrigger = trigger || null;
+    if (lightboxClose) lightboxClose.focus();
   }
 
   function closeLightbox() {
-    if (!lightbox) return;
+    if (!lightbox || !lightbox.classList.contains('is-open')) return;
     lightbox.classList.remove('is-open');
     lightbox.setAttribute('aria-hidden', 'true');
     lightboxImg.src = '';
+    if (lightboxTrigger) lightboxTrigger.focus();
+    lightboxTrigger = null;
   }
 
   document.querySelectorAll('.photo-strip img, .project-gallery img, .realworld-grid img, .stat-feature__image, .masonry-grid img, .text-media-trio img, .full-bleed-image, .vertical-carousel__content img').forEach((img) => {
-    img.addEventListener('click', () => openLightbox(img.src, img.alt));
+    img.setAttribute('tabindex', '0');
+    img.setAttribute('role', 'button');
+    if (img.alt) img.setAttribute('aria-label', `${img.alt} — view larger`);
+
+    img.addEventListener('click', () => openLightbox(img.src, img.alt, img));
+    img.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openLightbox(img.src, img.alt, img);
+      }
+    });
   });
 
   if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
   if (lightbox) {
     lightbox.addEventListener('click', (e) => {
       if (e.target === lightbox) closeLightbox();
+    });
+    // Only focusable descendant is the close button — Tab/Shift+Tab
+    // should simply keep focus there rather than escaping to the page.
+    lightbox.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab' && lightboxClose) {
+        e.preventDefault();
+        lightboxClose.focus();
+      }
     });
   }
   document.addEventListener('keydown', (e) => {
@@ -195,7 +224,11 @@
      Slides sit side by side in .video-carousel__slides; navigating
      translates that strip (the CSS transition does the sliding
      animation) rather than swapping display:none. The active slide's
-     video autoplays muted; every other slide's video is paused. */
+     video autoplays muted; every other slide's video is paused. Initial
+     playback is gated behind IntersectionObserver (see below) so the
+     first slide doesn't start downloading/playing until the carousel is
+     actually scrolled into view — manual navigation (goTo) always plays,
+     since a click/swipe on the carousel implies it's already visible. */
 
   document.querySelectorAll('.video-carousel').forEach((carousel) => {
     const slides = Array.from(carousel.querySelectorAll('.video-carousel__slide'));
@@ -207,13 +240,13 @@
     let index = slides.findIndex((s) => s.classList.contains('is-active'));
     if (index < 0) index = 0;
 
-    function render() {
+    function render(allowPlay) {
       slides.forEach((s, i) => {
         s.classList.toggle('is-active', i === index);
         const video = s.querySelector('video');
         if (!video) return;
         if (i === index) {
-          video.play().catch(() => {});
+          if (allowPlay) video.play().catch(() => {});
         } else {
           video.pause();
         }
@@ -227,10 +260,24 @@
 
     function goTo(newIndex) {
       index = (newIndex + slides.length) % slides.length;
-      render();
+      render(true);
     }
 
-    render();
+    render(false);
+
+    if ('IntersectionObserver' in window) {
+      const carouselObserver = new IntersectionObserver((entries, obs) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            render(true);
+            obs.disconnect();
+          }
+        });
+      }, { threshold: 0.25 });
+      carouselObserver.observe(carousel);
+    } else {
+      render(true);
+    }
 
     if (prevBtn) prevBtn.addEventListener('click', () => goTo(index - 1));
     if (nextBtn) nextBtn.addEventListener('click', () => goTo(index + 1));
@@ -301,6 +348,35 @@
     wrap.addEventListener('mouseenter', () => video.setAttribute('controls', ''));
     wrap.addEventListener('mouseleave', () => video.removeAttribute('controls'));
   });
+
+  /* --- Lazy-play ambient videos: the standalone muted/looping
+     background-style clips (tv-video.mp4, social-story.mp4,
+     app-launch-en.mp4) used to `autoplay` unconditionally on page load,
+     downloading and playing regardless of scroll position. They're now
+     `preload="none"` in the markup and only start once actually
+     scrolled into view, pausing again on scroll-out. Carousel slide
+     videos are excluded — .video-carousel above already drives their
+     play/pause per active slide. */
+  const lazyVideos = Array.from(document.querySelectorAll('.video-ui video'))
+    .filter((video) => !video.closest('.video-carousel__slide'));
+
+  if (lazyVideos.length) {
+    if ('IntersectionObserver' in window) {
+      const lazyVideoObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.play().catch(() => {});
+          } else {
+            entry.target.pause();
+          }
+        });
+      }, { threshold: 0.25 });
+
+      lazyVideos.forEach((video) => lazyVideoObserver.observe(video));
+    } else {
+      lazyVideos.forEach((video) => video.play().catch(() => {}));
+    }
+  }
 
   /* --- Approach carousel: arrows + dots + swipe, manual navigation
      only — identical to .video-carousel's logic, just a different
