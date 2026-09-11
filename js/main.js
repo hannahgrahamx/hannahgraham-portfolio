@@ -104,17 +104,19 @@
     const originalLabel = el.getAttribute('data-cursor-label') || 'Copy email';
 
     el.addEventListener('click', () => {
-      navigator.clipboard.writeText(EMAIL);
-
-      if (cursorContextInner) {
-        cursorContextInner.textContent = 'Copied!';
-      }
-
-      setTimeout(() => {
-        if (cursorContextInner && activeContextEl === el) {
-          cursorContextInner.textContent = originalLabel;
-        }
-      }, 1500);
+      navigator.clipboard.writeText(EMAIL).then(() => {
+        if (cursorContextInner) cursorContextInner.textContent = 'Copied!';
+      }, () => {
+        // Clipboard API can reject (denied permission, insecure context,
+        // etc.) — show that honestly instead of a false "Copied!".
+        if (cursorContextInner) cursorContextInner.textContent = 'Copy failed';
+      }).finally(() => {
+        setTimeout(() => {
+          if (cursorContextInner && activeContextEl === el) {
+            cursorContextInner.textContent = originalLabel;
+          }
+        }, 1500);
+      });
     });
   });
 
@@ -220,36 +222,38 @@
     if (e.key === 'Escape') closeLightbox();
   });
 
-  /* --- Video carousel: arrows + swipe, manual navigation only -------
-     Slides sit side by side in .video-carousel__slides; navigating
+  /* --- Shared carousel logic: arrows + dots + swipe, manual navigation
+     only. Used by both .video-carousel and .vertical-carousel — slides
+     sit side by side in a `${prefix}__slides` track; navigating
      translates that strip (the CSS transition does the sliding
-     animation) rather than swapping display:none. The active slide's
-     video autoplays muted; every other slide's video is paused. Initial
-     playback is gated behind IntersectionObserver (see below) so the
-     first slide doesn't start downloading/playing until the carousel is
-     actually scrolled into view — manual navigation (goTo) always plays,
-     since a click/swipe on the carousel implies it's already visible. */
+     animation) rather than swapping display:none. `onSlideChange`, when
+     given, is called for every slide on every render with (slide,
+     isActive, allowPlay) — video-carousel uses it to play/pause each
+     slide's video; vertical-carousel has no videos and omits it.
 
-  document.querySelectorAll('.video-carousel').forEach((carousel) => {
-    const slides = Array.from(carousel.querySelectorAll('.video-carousel__slide'));
-    const slidesTrack = carousel.querySelector('.video-carousel__slides');
-    const prevBtn = carousel.querySelector('.video-carousel__arrow--prev');
-    const nextBtn = carousel.querySelector('.video-carousel__arrow--next');
-    const dots = Array.from(carousel.querySelectorAll('.video-carousel__dot'));
-    const track = carousel.querySelector('.video-carousel__track');
+     When onSlideChange is given, the first render is gated behind
+     IntersectionObserver so the initially-active slide's video doesn't
+     start downloading/playing until the carousel actually scrolls into
+     view — manual navigation (goTo) always plays immediately, since a
+     click/swipe on the carousel implies it's already visible. Carousels
+     with no video (vertical-carousel) skip the observer entirely, same
+     as before. */
+  function initSlideCarousel(carousel, prefix, { onSlideChange } = {}) {
+    const slides = Array.from(carousel.querySelectorAll(`.${prefix}__slide`));
+    const slidesTrack = carousel.querySelector(`.${prefix}__slides`);
+    const prevBtn = carousel.querySelector(`.${prefix}__arrow--prev`);
+    const nextBtn = carousel.querySelector(`.${prefix}__arrow--next`);
+    const dots = Array.from(carousel.querySelectorAll(`.${prefix}__dot`));
+    const track = carousel.querySelector(`.${prefix}__track`);
+    if (!slides.length) return;
     let index = slides.findIndex((s) => s.classList.contains('is-active'));
     if (index < 0) index = 0;
 
     function render(allowPlay) {
       slides.forEach((s, i) => {
-        s.classList.toggle('is-active', i === index);
-        const video = s.querySelector('video');
-        if (!video) return;
-        if (i === index) {
-          if (allowPlay) video.play().catch(() => {});
-        } else {
-          video.pause();
-        }
+        const isActive = i === index;
+        s.classList.toggle('is-active', isActive);
+        if (onSlideChange) onSlideChange(s, isActive, allowPlay);
       });
       dots.forEach((d, i) => {
         d.classList.toggle('is-active', i === index);
@@ -263,18 +267,21 @@
       render(true);
     }
 
-    render(false);
-
-    if ('IntersectionObserver' in window) {
-      const carouselObserver = new IntersectionObserver((entries, obs) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            render(true);
-            obs.disconnect();
-          }
-        });
-      }, { threshold: 0.25 });
-      carouselObserver.observe(carousel);
+    if (onSlideChange) {
+      render(false);
+      if ('IntersectionObserver' in window) {
+        const carouselObserver = new IntersectionObserver((entries, obs) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              render(true);
+              obs.disconnect();
+            }
+          });
+        }, { threshold: 0.25 });
+        carouselObserver.observe(carousel);
+      } else {
+        render(true);
+      }
     } else {
       render(true);
     }
@@ -297,6 +304,20 @@
         else if (deltaX < -SWIPE_THRESHOLD) goTo(index + 1);
       }, { passive: true });
     }
+  }
+
+  document.querySelectorAll('.video-carousel').forEach((carousel) => {
+    initSlideCarousel(carousel, 'video-carousel', {
+      onSlideChange: (slide, isActive, allowPlay) => {
+        const video = slide.querySelector('video');
+        if (!video) return;
+        if (isActive) {
+          if (allowPlay) video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+    });
   });
 
   /* --- Site-wide video UI: hover-to-reveal controls + a transient
@@ -378,54 +399,10 @@
     }
   }
 
-  /* --- Approach carousel: arrows + dots + swipe, manual navigation
-     only — identical to .video-carousel's logic, just a different
-     class prefix. Controls are static; only the track slides. */
+  /* --- Approach carousel: same shared logic as .video-carousel above,
+     just a different class prefix and no video to play/pause. */
   document.querySelectorAll('.vertical-carousel').forEach((carousel) => {
-    const slides = Array.from(carousel.querySelectorAll('.vertical-carousel__slide'));
-    const slidesTrack = carousel.querySelector('.vertical-carousel__slides');
-    const prevBtn = carousel.querySelector('.vertical-carousel__arrow--prev');
-    const nextBtn = carousel.querySelector('.vertical-carousel__arrow--next');
-    const dots = Array.from(carousel.querySelectorAll('.vertical-carousel__dot'));
-    const track = carousel.querySelector('.vertical-carousel__track');
-    if (!slides.length) return;
-    let index = slides.findIndex((s) => s.classList.contains('is-active'));
-    if (index < 0) index = 0;
-
-    function render() {
-      slides.forEach((s, i) => s.classList.toggle('is-active', i === index));
-      dots.forEach((d, i) => {
-        d.classList.toggle('is-active', i === index);
-        d.setAttribute('aria-selected', i === index ? 'true' : 'false');
-      });
-      if (slidesTrack) slidesTrack.style.transform = `translateX(-${index * 100}%)`;
-    }
-
-    function goTo(newIndex) {
-      index = (newIndex + slides.length) % slides.length;
-      render();
-    }
-
-    render();
-
-    if (prevBtn) prevBtn.addEventListener('click', () => goTo(index - 1));
-    if (nextBtn) nextBtn.addEventListener('click', () => goTo(index + 1));
-    dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
-
-    if (track) {
-      let touchStartX = 0;
-
-      track.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-      }, { passive: true });
-
-      track.addEventListener('touchend', (e) => {
-        const deltaX = e.changedTouches[0].clientX - touchStartX;
-        const SWIPE_THRESHOLD = 40;
-        if (deltaX > SWIPE_THRESHOLD) goTo(index - 1);
-        else if (deltaX < -SWIPE_THRESHOLD) goTo(index + 1);
-      }, { passive: true });
-    }
+    initSlideCarousel(carousel, 'vertical-carousel');
   });
 
   /* --- Marquee: duplicate the author's one word-set enough times that
