@@ -465,23 +465,14 @@ body.is-pressing #cursor-flower {
 .link-btn--light:hover { color: var(--color-sand); }
 .link-btn--light:active { color: var(--color-yellow-light); }
 
-/* --- 404 page: centered message, default cream/dark body colours --- */
-.not-found {
-  min-height: 60vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: var(--space-2);
-  padding: var(--space-6) var(--space-2);
-}
-.not-found h1 {
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
-  max-width: 20ch;
-}
-.not-found__body {
-  max-width: 40ch;
+/* --- 404 page: reuses .project-hero/.bg-gradient-primary as-is (same
+   full-viewport-minus-header sizing, same left-aligned layout as every
+   project page hero) so the footer lands exactly at the bottom of the
+   first viewport with no page content after it, and only needs its own
+   CTA spacing. --- */
+.not-found__cta {
+  display: inline-block;
+  margin-top: var(--space-3);
 }
 
 /* =====================================================
