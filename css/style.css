@@ -2166,13 +2166,33 @@ body.is-pressing #cursor-flower {
   height: auto;
 }
 @media (min-width: 769px) {
-  /* 2fr/1fr (the original guess, made before real assets existed) put
-     the video at 414px tall next to a 907px-tall 3-image stack — more
-     than double. At 4fr/1fr the two land within ~10% of each other
-     (video ~497px vs stack ~554px, at a 1128px-wide grid), which is as
-     close as they get without cropping the images off their native
-     1351x1081 ratio. */
-  .phase-two-grid { grid-template-columns: 4fr 1fr; }
+  /* Per feedback: the whole band (heading + this grid) should read at a
+     glance with no scrolling, and video/stack should match in height
+     exactly, not just roughly. Both now driven off one shared height
+     instead of column-width ratios — object-fit:cover fills each cell
+     exactly (cropping is minimal: the video's 16:9 and the stills'
+     1351x1081 are both close enough to this band's own proportions that
+     nothing meaningful gets cut). 45vh keeps the whole band comfortably
+     inside a typical laptop viewport alongside its heading; 420px caps
+     it from growing huge on very tall screens. */
+  .phase-two-grid {
+    grid-template-columns: 4fr 1fr;
+    height: min(45vh, 420px);
+  }
+  .phase-two-grid__video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .phase-two-grid__stack {
+    grid-template-rows: repeat(3, 1fr);
+    height: 100%;
+  }
+  .phase-two-grid__stack img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 /* Video dropped into a .project-gallery figure (e.g. the Pinterest ad,
@@ -2187,6 +2207,36 @@ body.is-pressing #cursor-flower {
      browser's ~150px unloaded fallback height until it's scrolled into
      view and starts loading. */
   aspect-ratio: 2 / 3;
+}
+
+/* Pinterest ad pair (myhealthnb-launch), opt-in via --pair-equal: per
+   feedback the video and sticker should read as strictly 50/50, not
+   just equal-width columns left to their own native ratios (which left
+   the video ~140px taller than the sticker). Both figures share one
+   capped height so the whole pair stays on-screen without scrolling;
+   object-fit:cover fills each exactly. Desktop only — at the 2-column
+   mobile width this class doesn't change, cropping either asset to a
+   narrow sliver would cost more than it's worth. */
+@media (min-width: 769px) {
+  .project-gallery--pair-equal figure {
+    height: min(45vh, 420px);
+  }
+  /* The video sits inside a .video-ui wrapper div (for the hover-
+     controls/flash-icon behavior), not directly in <figure> like the
+     sticker <img> — without this, the video's height:100% below has no
+     definite parent height to resolve against (a percentage height
+     against an auto-height ancestor computes as auto), so it fell back
+     to its own aspect-ratio-driven 837px instead of matching the
+     sticker's capped height. */
+  .project-gallery--pair-equal .video-ui {
+    height: 100%;
+  }
+  .project-gallery--pair-equal img,
+  .project-gallery--pair-equal .project-gallery__video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 
