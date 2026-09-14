@@ -2166,13 +2166,42 @@ body.is-pressing #cursor-flower {
   height: auto;
 }
 @media (min-width: 769px) {
-  /* Per feedback: no height cap either — the 4fr/1fr column split is
-     what sets each piece's size (video and stills both keep their base
-     width:100%/height:auto/aspect-ratio rules above, just against a
-     narrower or wider column at this breakpoint). Video and stack won't
-     necessarily land at the same height; that's the accepted trade-off
-     for not cropping either one to force a match. */
-  .phase-two-grid { grid-template-columns: 4fr 1fr; }
+  /* Per feedback: exact height match takes priority over a specific
+     stack size — "whatever that means for the right row." A straight
+     fr ratio (what earlier attempts used) only matches by coincidence
+     at one exact container width; solved algebraically instead, which
+     holds at any width.
+
+     Given: the stack's own image ratio (1351:1081), its 2 internal
+     gaps (--space-1 each), the gap between the two grid columns
+     (--space-2), and the video's fixed 16:9 — there is exactly one
+     stack width, as a function of the grid's total width, where a 16:9
+     video filling the *remaining* space lands at precisely the stack's
+     height with nothing left over. Solving
+       stackWidth + columnGap + (stackHeight * 16/9) = totalWidth
+     for stackWidth (where stackHeight = 3*(stackWidth/1.2498) +
+     2*spaceUnit1) gives the calc() below. The video column is then
+     just 1fr (whatever's left) — by construction, exactly the width
+     its height needs. */
+  .phase-two-grid {
+    grid-template-columns: 1fr calc((100% - var(--space-1) * 32 / 9 - var(--space-2)) / 5.267);
+  }
+  /* No height override on the video needed — and deliberately none.
+     An earlier pass tried height:100% (matching the row) here, which
+     seemed to work but was actually a false positive from measuring
+     before the video's metadata had loaded: once the video is fully
+     loaded (readyState 4) its real 1920x1080 intrinsic size feeds into
+     the grid's auto-row-height computation (a percentage height on a
+     row that's still being computed can't resolve, so the browser falls
+     back to the item's intrinsic size for that computation) — the row
+     ballooned to 1080px and the video overflowed everything at every
+     width once actually loaded. The video keeps the base width:100%/
+     height:auto/aspect-ratio:16/9 rule instead — height is computed
+     FROM width via the ratio, not from the row, so there's no
+     percentage-height circularity to hit at all. This works by
+     construction: the calc() above was solved specifically so that the
+     video's column width, run through 16:9, lands at exactly the
+     stack's own natural (also width-driven, also non-circular) height. */
 }
 
 /* Video dropped into a .project-gallery figure (e.g. the Pinterest ad,
