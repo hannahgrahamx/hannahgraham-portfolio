@@ -2166,30 +2166,13 @@ body.is-pressing #cursor-flower {
   height: auto;
 }
 @media (min-width: 769px) {
-  /* Per feedback, forcing the video and stills to match heights exactly
-     via object-fit:cover cropped both in odd places — removed. Column
-     width alone drives layout now; each keeps its full, uncropped
-     natural aspect ratio (16:9 video, 1351x1081 stills), capped by
-     max-height (not height) so the band can't grow huge on a tall
-     screen without needing to crop anything to get there. Because nothing
-     stretches to fill a forced box anymore, the video and stack won't
-     necessarily land at the same height — that's the deliberate
-     trade-off for not cropping. */
+  /* Per feedback: no height cap either — the 4fr/1fr column split is
+     what sets each piece's size (video and stills both keep their base
+     width:100%/height:auto/aspect-ratio rules above, just against a
+     narrower or wider column at this breakpoint). Video and stack won't
+     necessarily land at the same height; that's the accepted trade-off
+     for not cropping either one to force a match. */
   .phase-two-grid { grid-template-columns: 4fr 1fr; }
-  .phase-two-grid__video {
-    width: auto;
-    max-width: 100%;
-    height: auto;
-    max-height: min(45vh, 420px);
-  }
-  .phase-two-grid__stack img {
-    width: auto;
-    max-width: 100%;
-    height: auto;
-    /* One third of the video's own cap, minus its share of the two
-       gaps between the three stacked images. */
-    max-height: calc((min(45vh, 420px) - 2 * var(--space-1)) / 3);
-  }
 }
 
 /* Video dropped into a .project-gallery figure (e.g. the Pinterest ad,
@@ -2205,25 +2188,6 @@ body.is-pressing #cursor-flower {
      view and starts loading. */
   aspect-ratio: 2 / 3;
 }
-
-/* Pinterest ad pair (myhealthnb-launch), opt-in via --pair-capped: the
-   video (2:3) and the sticker (2161:2701) don't share a ratio, so an
-   exact height match would need cropping one or both — per feedback,
-   that read as odd, so this only caps how tall either can get, same
-   width:auto/max-width:100%/height:auto/max-height pattern as
-   .video-feature__video elsewhere on this page. Both stay fully
-   uncropped; they won't necessarily land at the same height. Desktop
-   only — at the 2-column mobile width this class doesn't change. */
-@media (min-width: 769px) {
-  .project-gallery--pair-capped img,
-  .project-gallery--pair-capped .project-gallery__video {
-    width: auto;
-    max-width: 100%;
-    height: auto;
-    max-height: min(45vh, 420px);
-  }
-}
-
 
 /* Reflection's closing statement reads larger than standard body copy —
    Body LG tier, per the reference. */
