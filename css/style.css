@@ -2177,6 +2177,14 @@ body.is-pressing #cursor-flower {
      it from growing huge on very tall screens. */
   .phase-two-grid {
     grid-template-columns: 4fr 1fr;
+    /* grid-template-rows, not just height: a grid container's `height`
+       alone doesn't cap an auto-sized row — the default `grid-auto-rows:
+       auto` sizes to content, and a percentage height on the video/stack
+       below can't resolve against a row whose size is what's being
+       computed (circular), so it silently fell back to each item's own
+       aspect-ratio size instead of this cap. Setting the row itself to a
+       definite height fixes that at the source. */
+    grid-template-rows: min(45vh, 420px);
     height: min(45vh, 420px);
   }
   .phase-two-grid__video {
