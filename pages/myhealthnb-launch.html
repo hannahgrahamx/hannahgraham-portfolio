@@ -251,7 +251,7 @@
       </div>
     </div>
 
-    <!-- Phase two — 3 stacked images pending, see placeholders below -->
+    <!-- Phase two — follow-up video + 3 stacked TV-mockup stills -->
     <div class="project-gallery-band project-gallery-band--first project-gallery-band--last">
       <div class="container">
         <div class="phase-band__header">
@@ -259,18 +259,17 @@
           <p class="phase-band__label">Continued</p>
         </div>
         <div class="phase-two-grid">
-          <!-- PENDING ASSET: phase-two-video.mp4 — patient-summary-update-en.mp4
-               was used here previously but isn't the correct video for this
-               slot; any dark background belongs in that video's own footage,
-               not a separate CSS treatment on the placeholder. -->
-          <div class="asset-placeholder" data-pending-asset="phase-two-video.mp4">Video pending<br>Phase two video</div>
+          <div class="video-ui">
+            <video class="phase-two-grid__video" src="/assets/myhealthnb-launch/patient-summary-update-en.mp4" preload="none" muted loop playsinline></video>
+            <div class="video-ui__flash" aria-hidden="true">
+              <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+              <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"></path></svg>
+            </div>
+          </div>
           <div class="phase-two-grid__stack">
-            <!-- PENDING ASSET: tv-summary-update1.jpg -->
-            <div class="asset-placeholder" data-pending-asset="tv-summary-update1.jpg">Image pending<br>tv-summary-update1.jpg</div>
-            <!-- PENDING ASSET: tv-summary-update2.jpg -->
-            <div class="asset-placeholder" data-pending-asset="tv-summary-update2.jpg">Image pending<br>tv-summary-update2.jpg</div>
-            <!-- PENDING ASSET: tv-summary-update3.jpg -->
-            <div class="asset-placeholder" data-pending-asset="tv-summary-update3.jpg">Image pending<br>tv-summary-update3.jpg</div>
+            <img src="/assets/myhealthnb-launch/tv-summary-update1.jpg" alt="TV mockup of the MyHealthNB Patient Summary update reading 'Introducing the patient summary', beside a phone screen showing the app's records view, on a teal background.">
+            <img src="/assets/myhealthnb-launch/tv-summary-update2.jpg" alt="TV mockup of the MyHealthNB Patient Summary update showing a phone screen with a lock icon and passcode dots, reading 'Available exclusively on the MyHealthNB mobile app', on a maroon background.">
+            <img src="/assets/myhealthnb-launch/tv-summary-update3.jpg" alt="TV mockup of the MyHealthNB Patient Summary update reading 'Putting health care in your hands', beside a phone screen showing the patient summary list, on a dark background.">
           </div>
         </div>
       </div>
@@ -287,8 +286,13 @@
     <div class="container project-block">
       <div class="project-gallery project-gallery--pair">
         <figure>
-          <!-- PENDING ASSET: pinterest-ad.mp4 (see 24-01295-Health-MyHealthNB-PinterestAd-EN-V4.mp4 in assets, awaiting a clean-named copy) -->
-          <div class="asset-placeholder asset-placeholder--tall" data-pending-asset="pinterest-ad.mp4">Video pending<br>Pinterest Ad</div>
+          <div class="video-ui">
+            <video class="project-gallery__video" src="/assets/myhealthnb-launch/patient-summary-pinterest.mp4" preload="none" muted loop playsinline></video>
+            <div class="video-ui__flash" aria-hidden="true">
+              <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+              <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"></path></svg>
+            </div>
+          </div>
           <figcaption>Pinterest Ad | Vertical Video</figcaption>
         </figure>
         <figure>

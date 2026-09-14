@@ -2118,8 +2118,7 @@ body.is-pressing #cursor-flower {
 }
 
 /* "Phase two" band: heading + right-aligned "Continued" label, then a
-   video (left) with a stack of supporting stills (right) — the stack
-   items are currently placeholders, see .asset-placeholder below. */
+   video (left) with a stack of three supporting stills (right). */
 .phase-band__header {
   display: flex;
   align-items: baseline;
@@ -2139,39 +2138,34 @@ body.is-pressing #cursor-flower {
   grid-template-columns: 1fr;
   gap: var(--space-2);
 }
-/* Taller than the default placeholder so it reads roughly video-sized
-   next to the stack of three smaller placeholders beside it. */
-.phase-two-grid > .asset-placeholder { min-height: 400px; }
+.phase-two-grid__video {
+  display: block;
+  width: 100%;
+  height: auto;
+}
 .phase-two-grid__stack {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-1);
 }
+.phase-two-grid__stack img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
 @media (min-width: 769px) {
   .phase-two-grid { grid-template-columns: 2fr 1fr; }
 }
 
-/* Stand-in for an asset that hasn't been provided yet — dashed border
-   reads clearly as "placeholder," not a real design choice, and
-   data-pending-asset names the exact missing file so these are easy to
-   grep for before this page ships. */
-.asset-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 200px;
-  background: var(--color-sand);
-  border: 2px dashed var(--color-green-dark);
-  color: var(--color-green-dark);
-  font-size: 0.75rem;
-  font-weight: 440;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  text-align: center;
-  line-height: 1.6;
-  padding: var(--space-2);
+/* Video dropped into a .project-gallery figure (e.g. the Pinterest ad,
+   myhealthnb-launch) — same width:100%/height:auto treatment as
+   .project-gallery img above, which only targets <img>. */
+.project-gallery__video {
+  display: block;
+  width: 100%;
+  height: auto;
 }
-.asset-placeholder--tall { aspect-ratio: 2 / 3; min-height: 320px; }
+
 
 /* Reflection's closing statement reads larger than standard body copy —
    Body LG tier, per the reference. */
