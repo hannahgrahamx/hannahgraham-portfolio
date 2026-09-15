@@ -190,7 +190,7 @@
     lightboxTrigger = null;
   }
 
-  document.querySelectorAll('.photo-strip img, .project-gallery img, .realworld-grid img, .stat-feature__image, .masonry-grid img, .text-media-trio img, .full-bleed-image, .vertical-carousel__content img').forEach((img) => {
+  document.querySelectorAll('.photo-strip img, .project-gallery img, .realworld-grid img, .stat-feature__image, .masonry-grid img, .text-media-trio img, .full-bleed-image, .vertical-carousel__content img, .phase-two-grid__stack img').forEach((img) => {
     img.setAttribute('tabindex', '0');
     img.setAttribute('role', 'button');
     if (img.alt) img.setAttribute('aria-label', `${img.alt} — view larger`);
