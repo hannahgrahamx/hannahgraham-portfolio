@@ -7,3 +7,4 @@
 # Ad-hoc debug/comparison screenshots taken during development
 # (all real site images live under assets/, not here)
 /dev-screenshots/
+.claude/worktrees/
