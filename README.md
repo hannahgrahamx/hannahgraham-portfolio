@@ -1,38 +1,41 @@
 # hannahgraham-portfolio
-My portfolio website
 
+Hannah Graham's design portfolio — a static, multi-page site built with plain HTML, CSS and vanilla JavaScript (no framework, no build step, no npm dependencies), deployed via GitHub Pages at [hannahgraham.ca](https://hannahgraham.ca).
 
-A responsive website vibe coded with Claude and Gemini based on designs I created in Figma. 
+## Tech stack
 
-## 🚀 Status: Under Construction
-The site is currently in the initial development phase. A temporary landing page is live while the full architecture is being built.
+- HTML5 / CSS3
+- JavaScript (vanilla — no framework or bundler)
+- Google Fonts (Bricolage Grotesque, Space Grotesk), loaded via CDN `<link>`
+- GitHub Pages, custom domain via `CNAME`
 
-## 🛠️ Tech Stack
-* **HTML5 / CSS3**
-* **JavaScript** (Vanilla)
-* **Claude AI** (Development Partner)
-* **GitHub Pages** (Hosting)
+## Repository structure
 
-## 📁 Repository Structure
-* `/index.html` - The current live landing page.
-* `/assets` - Global styles, images, and scripts.
-
-
-## 📝 License
-This project is open source and available under the [MIT License](LICENSE).
-
-
-
-## File Structure
-my-website/
-├── index.html            (The "Under Construction" page currently)
-├── projects/             
-│   ├── project-a.html
-│   └── project-b.html
+```
+/
+├── index.html
+├── 404.html
+├── robots.txt
+├── sitemap.xml
+├── pages/
+│   ├── about.html
+│   └── [project-name].html      (one per case study)
+├── css/
+│   └── style.css
+├── js/
+│   └── main.js
 ├── assets/
-│   ├── css/
-│   ├── js/
-│   └── images/
-│       ├── ui/           (Buttons, logos)
-│       └── projects/     (Project page content)
-└── README.md
+│   ├── global/                  (logo, favicons, shared icons)
+│   └── [project-name]/          (per-project images/video)
+└── portfolio-website-PRD/       (design spec + reference screenshots)
+```
+
+Full requirements live in `portfolio-website-PRD/portfolio-website-PRD-v2.md`. `CLAUDE.md` and `STYLE.md` at the repo root document the working conventions and design-system constants (fonts, type scale, spacing, color tokens, breakpoints) used throughout `style.css`.
+
+## Development
+
+No build step — open `index.html` directly, or serve the repo root with any static file server (e.g. `python3 -m http.server`) so root-relative asset paths (`/css/style.css`, `/assets/...`) resolve correctly.
+
+## Deployment
+
+Pushes to `main` publish to GitHub Pages at the domain in `CNAME`.

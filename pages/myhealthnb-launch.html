@@ -15,12 +15,13 @@
 
   <link rel="icon" href="/assets/global/favicon-colour.png" media="(prefers-color-scheme: light)">
   <link rel="icon" href="/assets/global/favicon-white.png" media="(prefers-color-scheme: dark)">
+  <link rel="apple-touch-icon" href="/assets/global/apple-touch-icon.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="/css/style.css?v=152">
+  <link rel="stylesheet" href="/css/style.css?v=171">
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-DXP7KQ58ZQ"></script>
@@ -32,6 +33,8 @@
   </script>
 </head>
 <body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
 
   <!-- Custom cursor -->
   <div id="cursor-flower" aria-hidden="true">
@@ -86,7 +89,7 @@
     </div>
   </div>
 
-  <main>
+  <main id="main-content">
 
     <!-- Hero -->
     <section class="project-hero bg-gradient-primary">
@@ -140,7 +143,7 @@
       <div class="video-feature__inner container">
         <div class="video-feature__media">
           <div class="video-ui">
-            <video class="video-feature__video" src="/assets/myhealthnb-launch/app-launch-en.mp4" autoplay muted loop playsinline></video>
+            <video class="video-feature__video" src="/assets/myhealthnb-launch/app-launch-en.mp4" preload="none" muted loop playsinline></video>
             <div class="video-ui__flash" aria-hidden="true">
               <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
               <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"></path></svg>
@@ -248,26 +251,24 @@
       </div>
     </div>
 
-    <!-- Phase two — 3 stacked images pending, see placeholders below -->
+    <!-- Phase two — follow-up video + 3 stacked TV-mockup stills -->
     <div class="project-gallery-band project-gallery-band--first project-gallery-band--last">
       <div class="container">
         <div class="phase-band__header">
           <h2 class="section-heading">Phase two</h2>
-          <p class="phase-band__label">Continued</p>
         </div>
         <div class="phase-two-grid">
-          <!-- PENDING ASSET: phase-two-video.mp4 — patient-summary-update-en.mp4
-               was used here previously but isn't the correct video for this
-               slot; any dark background belongs in that video's own footage,
-               not a separate CSS treatment on the placeholder. -->
-          <div class="asset-placeholder" data-pending-asset="phase-two-video.mp4">Video pending<br>Phase two video</div>
+          <div class="video-ui">
+            <video class="phase-two-grid__video" src="/assets/myhealthnb-launch/patient-summary-update-en.mp4" preload="none" muted loop playsinline></video>
+            <div class="video-ui__flash" aria-hidden="true">
+              <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+              <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"></path></svg>
+            </div>
+          </div>
           <div class="phase-two-grid__stack">
-            <!-- PENDING ASSET: tv-summary-update1.jpg -->
-            <div class="asset-placeholder" data-pending-asset="tv-summary-update1.jpg">Image pending<br>tv-summary-update1.jpg</div>
-            <!-- PENDING ASSET: tv-summary-update2.jpg -->
-            <div class="asset-placeholder" data-pending-asset="tv-summary-update2.jpg">Image pending<br>tv-summary-update2.jpg</div>
-            <!-- PENDING ASSET: tv-summary-update3.jpg -->
-            <div class="asset-placeholder" data-pending-asset="tv-summary-update3.jpg">Image pending<br>tv-summary-update3.jpg</div>
+            <img src="/assets/myhealthnb-launch/tv-summary-update1.jpg" alt="TV mockup of the MyHealthNB Patient Summary update reading 'Introducing the patient summary', beside a phone screen showing the app's records view, on a teal background.">
+            <img src="/assets/myhealthnb-launch/tv-summary-update2.jpg" alt="TV mockup of the MyHealthNB Patient Summary update showing a phone screen with a lock icon and passcode dots, reading 'Available exclusively on the MyHealthNB mobile app', on a maroon background.">
+            <img src="/assets/myhealthnb-launch/tv-summary-update3.jpg" alt="TV mockup of the MyHealthNB Patient Summary update reading 'Putting health care in your hands', beside a phone screen showing the patient summary list, on a dark background.">
           </div>
         </div>
       </div>
@@ -284,8 +285,13 @@
     <div class="container project-block">
       <div class="project-gallery project-gallery--pair">
         <figure>
-          <!-- PENDING ASSET: pinterest-ad.mp4 (see 24-01295-Health-MyHealthNB-PinterestAd-EN-V4.mp4 in assets, awaiting a clean-named copy) -->
-          <div class="asset-placeholder asset-placeholder--tall" data-pending-asset="pinterest-ad.mp4">Video pending<br>Pinterest Ad</div>
+          <div class="video-ui">
+            <video class="project-gallery__video" src="/assets/myhealthnb-launch/patient-summary-pinterest.mp4?v=2" preload="none" muted loop playsinline></video>
+            <div class="video-ui__flash" aria-hidden="true">
+              <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+              <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"></path></svg>
+            </div>
+          </div>
           <figcaption>Pinterest Ad | Vertical Video</figcaption>
         </figure>
         <figure>
@@ -374,7 +380,7 @@
       <div class="site-footer__links">
         <button data-copy-email data-cursor-label="Copy email">Email<svg class="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
         <a href="https://www.linkedin.com/in/hannahgraham-one/" target="_blank" rel="noopener" data-cursor-label="Open link">LinkedIn</a>
-        <a href="https://www.tiktok.com/@hannah.design" target="_blank" rel="noopener" data-cursor-label="Open link">TikTok</a>
+        <!-- TikTok removed per feedback, may return in future: <a href="https://www.tiktok.com/@hannah.design" target="_blank" rel="noopener" data-cursor-label="Open link">TikTok</a> -->
         <a href="https://dribbble.com/hannahgraham" target="_blank" rel="noopener" data-cursor-label="Open link">Dribbble</a>
       </div>
     </div>
@@ -382,11 +388,17 @@
   </footer>
 
   <!-- Lightbox — shared across all photo/carousel triggers -->
-  <div id="lightbox" aria-hidden="true">
+  <div id="lightbox" role="dialog" aria-modal="true" aria-label="Image preview" aria-hidden="true">
+    <button id="lightbox__prev" aria-label="Previous image" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+    </button>
     <button id="lightbox__close" aria-label="Close">&times;</button>
+    <button id="lightbox__next" aria-label="Next image" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg>
+    </button>
     <img id="lightbox__img" src="" alt="">
   </div>
 
-  <script src="/js/main.js?v=24"></script>
+  <script src="/js/main.js?v=27"></script>
 </body>
 </html>

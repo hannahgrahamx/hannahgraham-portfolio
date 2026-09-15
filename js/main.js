@@ -104,17 +104,19 @@
     const originalLabel = el.getAttribute('data-cursor-label') || 'Copy email';
 
     el.addEventListener('click', () => {
-      navigator.clipboard.writeText(EMAIL);
-
-      if (cursorContextInner) {
-        cursorContextInner.textContent = 'Copied!';
-      }
-
-      setTimeout(() => {
-        if (cursorContextInner && activeContextEl === el) {
-          cursorContextInner.textContent = originalLabel;
-        }
-      }, 1500);
+      navigator.clipboard.writeText(EMAIL).then(() => {
+        if (cursorContextInner) cursorContextInner.textContent = 'Copied!';
+      }, () => {
+        // Clipboard API can reject (denied permission, insecure context,
+        // etc.) — show that honestly instead of a false "Copied!".
+        if (cursorContextInner) cursorContextInner.textContent = 'Copy failed';
+      }).finally(() => {
+        setTimeout(() => {
+          if (cursorContextInner && activeContextEl === el) {
+            cursorContextInner.textContent = originalLabel;
+          }
+        }, 1500);
+      });
     });
   });
 
@@ -156,67 +158,154 @@
     });
   }
 
-  /* --- Lightbox: click a photo to view it large at its natural ratio --- */
+  /* --- Lightbox: click (or keyboard-activate) a photo to view it large
+     at its natural ratio, with prev/next arrows to move through the
+     other images in the same gallery/section — not every image on the
+     page. A photo's "group" is every lightbox-eligible image sharing
+     its nearest gallery-container ancestor (one .project-gallery--trio,
+     one .photo-strip, all four slides of one .vertical-carousel, etc.);
+     an image with no such ancestor (a standalone .full-bleed-image, say)
+     is a group of one, and the arrows stay hidden for it.
+
+     #lightbox carries role="dialog"/aria-modal in the markup; this wires
+     up the matching behaviour — focus moves to the close button on
+     open, Tab is trapped among whichever of prev/close/next are
+     currently visible, and focus returns to whichever thumbnail opened
+     it on close, so keyboard/screen-reader users aren't dropped into
+     the page behind it. */
 
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightbox__img');
   const lightboxClose = document.getElementById('lightbox__close');
+  const lightboxPrev = document.getElementById('lightbox__prev');
+  const lightboxNext = document.getElementById('lightbox__next');
+  let lightboxTrigger = null;
+  let lightboxGroup = [];
+  let lightboxIndex = -1;
 
-  function openLightbox(src, alt) {
+  const LIGHTBOX_IMG_SELECTOR = '.photo-strip img, .project-gallery img, .realworld-grid img, .stat-feature__image, .masonry-grid img, .text-media-trio img, .full-bleed-image, .vertical-carousel__content img, .phase-two-grid__stack img';
+  const LIGHTBOX_GROUP_ANCESTOR_SELECTOR = '.photo-strip, .project-gallery, .realworld-grid, .masonry-grid, .text-media-trio, .vertical-carousel, .phase-two-grid__stack';
+  const lightboxImages = Array.from(document.querySelectorAll(LIGHTBOX_IMG_SELECTOR));
+
+  function getLightboxGroup(img) {
+    const root = img.closest(LIGHTBOX_GROUP_ANCESTOR_SELECTOR);
+    if (!root) return [img];
+    const groupImgs = Array.from(root.querySelectorAll('img')).filter((candidate) => lightboxImages.includes(candidate));
+    return groupImgs.length ? groupImgs : [img];
+  }
+
+  function showLightboxImage(index) {
+    const img = lightboxGroup[index];
+    if (!img) return;
+    lightboxIndex = index;
+    lightboxImg.src = img.src;
+    lightboxImg.alt = img.alt || '';
+    const isMulti = lightboxGroup.length > 1;
+    if (lightboxPrev) lightboxPrev.hidden = !isMulti;
+    if (lightboxNext) lightboxNext.hidden = !isMulti;
+  }
+
+  function goToLightboxImage(delta) {
+    if (lightboxGroup.length < 2) return;
+    showLightboxImage((lightboxIndex + delta + lightboxGroup.length) % lightboxGroup.length);
+  }
+
+  function openLightbox(img) {
     if (!lightbox) return;
-    lightboxImg.src = src;
-    lightboxImg.alt = alt || '';
+    lightboxGroup = getLightboxGroup(img);
+    const index = lightboxGroup.indexOf(img);
+    showLightboxImage(index >= 0 ? index : 0);
     lightbox.classList.add('is-open');
     lightbox.setAttribute('aria-hidden', 'false');
+    lightboxTrigger = img;
+    if (lightboxClose) lightboxClose.focus();
   }
 
   function closeLightbox() {
-    if (!lightbox) return;
+    if (!lightbox || !lightbox.classList.contains('is-open')) return;
     lightbox.classList.remove('is-open');
     lightbox.setAttribute('aria-hidden', 'true');
     lightboxImg.src = '';
+    if (lightboxTrigger) lightboxTrigger.focus();
+    lightboxTrigger = null;
+    lightboxGroup = [];
+    lightboxIndex = -1;
   }
 
-  document.querySelectorAll('.photo-strip img, .project-gallery img, .realworld-grid img, .stat-feature__image, .masonry-grid img, .text-media-trio img, .full-bleed-image, .vertical-carousel__content img').forEach((img) => {
-    img.addEventListener('click', () => openLightbox(img.src, img.alt));
+  lightboxImages.forEach((img) => {
+    img.setAttribute('tabindex', '0');
+    img.setAttribute('role', 'button');
+    if (img.alt) img.setAttribute('aria-label', `${img.alt} — view larger`);
+
+    img.addEventListener('click', () => openLightbox(img));
+    img.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openLightbox(img);
+      }
+    });
   });
 
   if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+  if (lightboxPrev) lightboxPrev.addEventListener('click', () => goToLightboxImage(-1));
+  if (lightboxNext) lightboxNext.addEventListener('click', () => goToLightboxImage(1));
   if (lightbox) {
     lightbox.addEventListener('click', (e) => {
       if (e.target === lightbox) closeLightbox();
     });
+    // Tab is trapped among whichever of prev/close/next are currently
+    // visible (prev/next hide entirely for a single-image group) rather
+    // than escaping to the page behind the dialog.
+    lightbox.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab') return;
+      const focusable = [lightboxPrev, lightboxClose, lightboxNext].filter((el) => el && !el.hidden);
+      if (!focusable.length) return;
+      e.preventDefault();
+      const current = focusable.indexOf(document.activeElement);
+      const dir = e.shiftKey ? -1 : 1;
+      const next = current === -1 ? 0 : (current + dir + focusable.length) % focusable.length;
+      focusable[next].focus();
+    });
   }
   document.addEventListener('keydown', (e) => {
+    if (!lightbox || !lightbox.classList.contains('is-open')) return;
     if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') goToLightboxImage(-1);
+    if (e.key === 'ArrowRight') goToLightboxImage(1);
   });
 
-  /* --- Video carousel: arrows + swipe, manual navigation only -------
-     Slides sit side by side in .video-carousel__slides; navigating
+  /* --- Shared carousel logic: arrows + dots + swipe, manual navigation
+     only. Used by both .video-carousel and .vertical-carousel — slides
+     sit side by side in a `${prefix}__slides` track; navigating
      translates that strip (the CSS transition does the sliding
-     animation) rather than swapping display:none. The active slide's
-     video autoplays muted; every other slide's video is paused. */
+     animation) rather than swapping display:none. `onSlideChange`, when
+     given, is called for every slide on every render with (slide,
+     isActive, allowPlay) — video-carousel uses it to play/pause each
+     slide's video; vertical-carousel has no videos and omits it.
 
-  document.querySelectorAll('.video-carousel').forEach((carousel) => {
-    const slides = Array.from(carousel.querySelectorAll('.video-carousel__slide'));
-    const slidesTrack = carousel.querySelector('.video-carousel__slides');
-    const prevBtn = carousel.querySelector('.video-carousel__arrow--prev');
-    const nextBtn = carousel.querySelector('.video-carousel__arrow--next');
-    const dots = Array.from(carousel.querySelectorAll('.video-carousel__dot'));
-    const track = carousel.querySelector('.video-carousel__track');
+     When onSlideChange is given, the first render is gated behind
+     IntersectionObserver so the initially-active slide's video doesn't
+     start downloading/playing until the carousel actually scrolls into
+     view — manual navigation (goTo) always plays immediately, since a
+     click/swipe on the carousel implies it's already visible. Carousels
+     with no video (vertical-carousel) skip the observer entirely, same
+     as before. */
+  function initSlideCarousel(carousel, prefix, { onSlideChange } = {}) {
+    const slides = Array.from(carousel.querySelectorAll(`.${prefix}__slide`));
+    const slidesTrack = carousel.querySelector(`.${prefix}__slides`);
+    const prevBtn = carousel.querySelector(`.${prefix}__arrow--prev`);
+    const nextBtn = carousel.querySelector(`.${prefix}__arrow--next`);
+    const dots = Array.from(carousel.querySelectorAll(`.${prefix}__dot`));
+    const track = carousel.querySelector(`.${prefix}__track`);
+    if (!slides.length) return;
     let index = slides.findIndex((s) => s.classList.contains('is-active'));
     if (index < 0) index = 0;
 
-    function render() {
+    function render(allowPlay) {
       slides.forEach((s, i) => {
-        s.classList.toggle('is-active', i === index);
-        const video = s.querySelector('video');
-        if (!video) return;
-        if (i === index) {
-          video.play().catch(() => {});
-        } else {
-          video.pause();
-        }
+        const isActive = i === index;
+        s.classList.toggle('is-active', isActive);
+        if (onSlideChange) onSlideChange(s, isActive, allowPlay);
       });
       dots.forEach((d, i) => {
         d.classList.toggle('is-active', i === index);
@@ -227,10 +316,27 @@
 
     function goTo(newIndex) {
       index = (newIndex + slides.length) % slides.length;
-      render();
+      render(true);
     }
 
-    render();
+    if (onSlideChange) {
+      render(false);
+      if ('IntersectionObserver' in window) {
+        const carouselObserver = new IntersectionObserver((entries, obs) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              render(true);
+              obs.disconnect();
+            }
+          });
+        }, { threshold: 0.25 });
+        carouselObserver.observe(carousel);
+      } else {
+        render(true);
+      }
+    } else {
+      render(true);
+    }
 
     if (prevBtn) prevBtn.addEventListener('click', () => goTo(index - 1));
     if (nextBtn) nextBtn.addEventListener('click', () => goTo(index + 1));
@@ -250,6 +356,20 @@
         else if (deltaX < -SWIPE_THRESHOLD) goTo(index + 1);
       }, { passive: true });
     }
+  }
+
+  document.querySelectorAll('.video-carousel').forEach((carousel) => {
+    initSlideCarousel(carousel, 'video-carousel', {
+      onSlideChange: (slide, isActive, allowPlay) => {
+        const video = slide.querySelector('video');
+        if (!video) return;
+        if (isActive) {
+          if (allowPlay) video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+    });
   });
 
   /* --- Site-wide video UI: hover-to-reveal controls + a transient
@@ -302,54 +422,39 @@
     wrap.addEventListener('mouseleave', () => video.removeAttribute('controls'));
   });
 
-  /* --- Approach carousel: arrows + dots + swipe, manual navigation
-     only — identical to .video-carousel's logic, just a different
-     class prefix. Controls are static; only the track slides. */
+  /* --- Lazy-play ambient videos: the standalone muted/looping
+     background-style clips (tv-video.mp4, social-story.mp4,
+     app-launch-en.mp4) used to `autoplay` unconditionally on page load,
+     downloading and playing regardless of scroll position. They're now
+     `preload="none"` in the markup and only start once actually
+     scrolled into view, pausing again on scroll-out. Carousel slide
+     videos are excluded — .video-carousel above already drives their
+     play/pause per active slide. */
+  const lazyVideos = Array.from(document.querySelectorAll('.video-ui video'))
+    .filter((video) => !video.closest('.video-carousel__slide'));
+
+  if (lazyVideos.length) {
+    if ('IntersectionObserver' in window) {
+      const lazyVideoObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.play().catch(() => {});
+          } else {
+            entry.target.pause();
+          }
+        });
+      }, { threshold: 0.25 });
+
+      lazyVideos.forEach((video) => lazyVideoObserver.observe(video));
+    } else {
+      lazyVideos.forEach((video) => video.play().catch(() => {}));
+    }
+  }
+
+  /* --- Approach carousel: same shared logic as .video-carousel above,
+     just a different class prefix and no video to play/pause. */
   document.querySelectorAll('.vertical-carousel').forEach((carousel) => {
-    const slides = Array.from(carousel.querySelectorAll('.vertical-carousel__slide'));
-    const slidesTrack = carousel.querySelector('.vertical-carousel__slides');
-    const prevBtn = carousel.querySelector('.vertical-carousel__arrow--prev');
-    const nextBtn = carousel.querySelector('.vertical-carousel__arrow--next');
-    const dots = Array.from(carousel.querySelectorAll('.vertical-carousel__dot'));
-    const track = carousel.querySelector('.vertical-carousel__track');
-    if (!slides.length) return;
-    let index = slides.findIndex((s) => s.classList.contains('is-active'));
-    if (index < 0) index = 0;
-
-    function render() {
-      slides.forEach((s, i) => s.classList.toggle('is-active', i === index));
-      dots.forEach((d, i) => {
-        d.classList.toggle('is-active', i === index);
-        d.setAttribute('aria-selected', i === index ? 'true' : 'false');
-      });
-      if (slidesTrack) slidesTrack.style.transform = `translateX(-${index * 100}%)`;
-    }
-
-    function goTo(newIndex) {
-      index = (newIndex + slides.length) % slides.length;
-      render();
-    }
-
-    render();
-
-    if (prevBtn) prevBtn.addEventListener('click', () => goTo(index - 1));
-    if (nextBtn) nextBtn.addEventListener('click', () => goTo(index + 1));
-    dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
-
-    if (track) {
-      let touchStartX = 0;
-
-      track.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-      }, { passive: true });
-
-      track.addEventListener('touchend', (e) => {
-        const deltaX = e.changedTouches[0].clientX - touchStartX;
-        const SWIPE_THRESHOLD = 40;
-        if (deltaX > SWIPE_THRESHOLD) goTo(index - 1);
-        else if (deltaX < -SWIPE_THRESHOLD) goTo(index + 1);
-      }, { passive: true });
-    }
+    initSlideCarousel(carousel, 'vertical-carousel');
   });
 
   /* --- Marquee: duplicate the author's one word-set enough times that
@@ -381,4 +486,37 @@
       resizeTimer = setTimeout(build, 200);
     });
   });
+
+  /* --- Marquee hover/click pause: hovering OR clicking either row
+     pauses BOTH together, not just the one interacted with — per
+     feedback. Click is a separate, persistent toggle from hover: it
+     stays paused after the mouse leaves until clicked again, whereas
+     hover alone releases as soon as the mouse leaves either row. Both
+     states are tracked independently and OR'd together so releasing one
+     doesn't cut a pause still being held by the other. */
+  const marquees = Array.from(document.querySelectorAll('.marquee'));
+  if (marquees.length) {
+    let hoverPaused = false;
+    let clickPaused = false;
+
+    function updateMarqueePause() {
+      const paused = hoverPaused || clickPaused;
+      marquees.forEach((m) => m.classList.toggle('is-paused', paused));
+    }
+
+    marquees.forEach((m) => {
+      m.addEventListener('mouseenter', () => {
+        hoverPaused = true;
+        updateMarqueePause();
+      });
+      m.addEventListener('mouseleave', () => {
+        hoverPaused = false;
+        updateMarqueePause();
+      });
+      m.addEventListener('click', () => {
+        clickPaused = !clickPaused;
+        updateMarqueePause();
+      });
+    });
+  }
 })();

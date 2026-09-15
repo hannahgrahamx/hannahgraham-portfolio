@@ -141,6 +141,27 @@ button:focus-visible,
   border-radius: 2px;
 }
 
+/* Skip-to-content link — invisible until keyboard-focused, lets keyboard
+   users jump past the repeated header/nav straight to <main> instead of
+   tabbing through it on every page. */
+.skip-link {
+  position: absolute;
+  top: var(--space-1);
+  left: var(--space-1);
+  z-index: 1000;
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-dark);
+  color: var(--color-cream);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  text-decoration: underline;
+  transform: translateY(-150%);
+  transition: transform 200ms ease-in-out;
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+
 /* =====================================================
    3. "THE GRAPH" — shared grid-pattern background
    0.5px white stroke, 30px cells, 10% opacity, on --color-grid
@@ -443,6 +464,16 @@ body.is-pressing #cursor-flower {
 }
 .link-btn--light:hover { color: var(--color-sand); }
 .link-btn--light:active { color: var(--color-yellow-light); }
+
+/* --- 404 page: reuses .project-hero/.bg-gradient-primary as-is (same
+   full-viewport-minus-header sizing, same left-aligned layout as every
+   project page hero) so the footer lands exactly at the bottom of the
+   first viewport with no page content after it, and only needs its own
+   CTA spacing. --- */
+.not-found__cta {
+  display: inline-block;
+  margin-top: var(--space-3);
+}
 
 /* =====================================================
    6. HEADER / NAVIGATION
@@ -1922,6 +1953,11 @@ body.is-pressing #cursor-flower {
   display: block;
   width: 100%;
   height: auto;
+  /* Both tv-video.mp4 and social-story.mp4 are 1080x1350 (4:5) —
+     reserves the correct box immediately instead of the browser's
+     ~150px unloaded-video fallback, since these are preload="none" and
+     don't fetch until scrolled into view (see main.js's lazy-play). */
+  aspect-ratio: 4 / 5;
 }
 .media-pair__caption {
   margin-top: var(--space-1);
@@ -2036,6 +2072,9 @@ body.is-pressing #cursor-flower {
   height: auto;
   margin: 0;
   background: var(--color-dark);
+  /* app-launch-en.mp4 is 1920x1080 (16:9) — same collapse-prevention
+     reasoning as .media-pair__video above. */
+  aspect-ratio: 16 / 9;
 }
 .video-feature__caption {
   /* No max-width (unlike .video-carousel__caption) — the container itself
@@ -2086,61 +2125,89 @@ body.is-pressing #cursor-flower {
   .text-media-trio { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* "Phase two" band: heading + right-aligned "Continued" label, then a
-   video (left) with a stack of supporting stills (right) — the stack
-   items are currently placeholders, see .asset-placeholder below. */
+/* "Phase two" band: heading, then a video (left) with a stack of three
+   supporting stills (right). */
 .phase-band__header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-2);
   margin-bottom: var(--space-3);
-}
-.phase-band__label {
-  font-size: 0.875rem; /* Labels tier: 14px */
-  font-weight: 440;
-  text-transform: uppercase;
-  color: var(--color-green-dark);
-  flex-shrink: 0;
 }
 .phase-two-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-2);
 }
-/* Taller than the default placeholder so it reads roughly video-sized
-   next to the stack of three smaller placeholders beside it. */
-.phase-two-grid > .asset-placeholder { min-height: 400px; }
+.phase-two-grid__video {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Real dimensions (1920x1080) — reserves the correct box immediately
+     instead of the browser's ~150px unloaded-video fallback, since this
+     video is preload="none" and doesn't fetch until scrolled into view. */
+  aspect-ratio: 16 / 9;
+}
 .phase-two-grid__stack {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-1);
 }
+.phase-two-grid__stack img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
 @media (min-width: 769px) {
-  .phase-two-grid { grid-template-columns: 2fr 1fr; }
+  /* Per feedback: exact height match takes priority over a specific
+     stack size — "whatever that means for the right row." A straight
+     fr ratio (what earlier attempts used) only matches by coincidence
+     at one exact container width; solved algebraically instead, which
+     holds at any width.
+
+     Given: the stack's own image ratio (1351:1081), its 2 internal
+     gaps (--space-1 each), the gap between the two grid columns
+     (--space-2), and the video's fixed 16:9 — there is exactly one
+     stack width, as a function of the grid's total width, where a 16:9
+     video filling the *remaining* space lands at precisely the stack's
+     height with nothing left over. Solving
+       stackWidth + columnGap + (stackHeight * 16/9) = totalWidth
+     for stackWidth (where stackHeight = 3*(stackWidth/1.2498) +
+     2*spaceUnit1) gives the calc() below. The video column is then
+     just 1fr (whatever's left) — by construction, exactly the width
+     its height needs. */
+  .phase-two-grid {
+    grid-template-columns: 1fr calc((100% - var(--space-1) * 32 / 9 - var(--space-2)) / 5.267);
+  }
+  /* No height override on the video needed — and deliberately none.
+     An earlier pass tried height:100% (matching the row) here, which
+     seemed to work but was actually a false positive from measuring
+     before the video's metadata had loaded: once the video is fully
+     loaded (readyState 4) its real 1920x1080 intrinsic size feeds into
+     the grid's auto-row-height computation (a percentage height on a
+     row that's still being computed can't resolve, so the browser falls
+     back to the item's intrinsic size for that computation) — the row
+     ballooned to 1080px and the video overflowed everything at every
+     width once actually loaded. The video keeps the base width:100%/
+     height:auto/aspect-ratio:16/9 rule instead — height is computed
+     FROM width via the ratio, not from the row, so there's no
+     percentage-height circularity to hit at all. This works by
+     construction: the calc() above was solved specifically so that the
+     video's column width, run through 16:9, lands at exactly the
+     stack's own natural (also width-driven, also non-circular) height. */
 }
 
-/* Stand-in for an asset that hasn't been provided yet — dashed border
-   reads clearly as "placeholder," not a real design choice, and
-   data-pending-asset names the exact missing file so these are easy to
-   grep for before this page ships. */
-.asset-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 200px;
-  background: var(--color-sand);
-  border: 2px dashed var(--color-green-dark);
-  color: var(--color-green-dark);
-  font-size: 0.75rem;
-  font-weight: 440;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  text-align: center;
-  line-height: 1.6;
-  padding: var(--space-2);
+/* Video dropped into a .project-gallery figure (e.g. the Pinterest ad,
+   myhealthnb-launch) — same width:100%/height:auto treatment as
+   .project-gallery img above, which only targets <img>. */
+.project-gallery__video {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Real dimensions 1080x1352 (135:169) — updated when the Pinterest ad
+     video was replaced with a new file (was 1000x1500/2:3 before).
+     Reasoning otherwise unchanged from .phase-two-grid__video above:
+     without this, the preload="none" video collapses to the browser's
+     ~150px unloaded fallback height until it's scrolled into view and
+     starts loading. */
+  aspect-ratio: 135 / 169;
 }
-.asset-placeholder--tall { aspect-ratio: 2 / 3; min-height: 320px; }
 
 /* Reflection's closing statement reads larger than standard body copy —
    Body LG tier, per the reference. */
@@ -2576,6 +2643,36 @@ body.is-pressing #cursor-flower {
   color: var(--color-cream);
   cursor: none;
 }
+/* Prev/next — move through the other images in the same gallery/
+   section as the one that opened the lightbox (see main.js). Hidden
+   via [hidden] for a single-image group, same as any other optional
+   control on the site. */
+#lightbox__prev,
+#lightbox__next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  color: var(--color-cream);
+  cursor: none;
+  transition: color 0.18s ease;
+}
+#lightbox__prev svg,
+#lightbox__next svg { width: 100%; height: 100%; }
+#lightbox__prev:hover,
+#lightbox__next:hover { color: var(--color-pink-light); }
+#lightbox__prev { left: var(--space-3); }
+#lightbox__next { right: var(--space-3); }
+@media (max-width: 480px) {
+  #lightbox__prev,
+  #lightbox__next {
+    width: 36px;
+    height: 36px;
+  }
+  #lightbox__prev { left: var(--space-1); }
+  #lightbox__next { right: var(--space-1); }
+}
 
 /* =====================================================
    11. HOME PAGE
@@ -2756,23 +2853,22 @@ body.is-pressing #cursor-flower {
   background-clip: text;
   color: transparent;
 }
-/* Ambient glow: small and subtle by default, per feedback. Flares up on
-   hover — the blurred-halo look from a glitch/glow reference image,
-   applied as an interaction rather than a constant effect — via a smooth
-   eased transition (not a snap or a stepped/choppy animation) on both
-   blur radius and opacity. */
+/* Ambient glow — always on (per earlier feedback, this used to only
+   flare up on hover from a much subtler resting state), and now flares
+   further still on hover on top of that constant base — per feedback,
+   stronger blur/opacity than the always-on level. */
 .home-hero__heading-glow {
   position: absolute;
   inset: 0;
   pointer-events: none;
   mix-blend-mode: hard-light;
-  filter: blur(12px);
-  opacity: 0.5;
+  filter: blur(28px);
+  opacity: 0.85;
   transition: filter 0.4s ease, opacity 0.4s ease;
 }
 .home-hero__heading:hover .home-hero__heading-glow {
-  filter: blur(28px);
-  opacity: 0.85;
+  filter: blur(40px);
+  opacity: 1;
 }
 
 /* Chromatic-aberration / RGB-split effect, per feedback (inspired by a
@@ -2849,7 +2945,7 @@ body.is-pressing #cursor-flower {
   display: flex;
   width: max-content;
   gap: var(--space-6);
-  animation: marquee-scroll 26s linear infinite; /* slowed slightly from 22s, per feedback */
+  animation: marquee-scroll 40s linear infinite; /* slowed further from 26s, per feedback */
 }
 /* Second row scrolls the opposite direction — reusing the same
    marquee-scroll keyframe (0% → -50%) via animation-direction:reverse
@@ -2871,9 +2967,13 @@ body.is-pressing #cursor-flower {
 .marquee--bold .marquee__track span {
   font-weight: 700;
 }
-/* Hover pauses the scroll, per feedback — hovering the section (not just
-   the track) so moving over any word, gap, or divider keeps it paused. */
-.marquee:hover .marquee__track {
+/* Hovering OR clicking either row pauses BOTH rows together, not just
+   the one interacted with — see main.js, which toggles this class on
+   both .marquee elements at once regardless of which one triggered it.
+   Click is a persistent toggle (stays paused after the mouse leaves,
+   independent of hover); hover alone releases as soon as the mouse
+   leaves either row. */
+.marquee.is-paused .marquee__track {
   animation-play-state: paused;
 }
 .marquee__track span {

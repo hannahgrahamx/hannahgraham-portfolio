@@ -230,9 +230,13 @@ Not specified in the design files — recommended default: a visible 2px solid o
 GA4 tracking ID: `G-DXP7KQ58ZQ` (added after initial PRD — not yet in the PRD source doc, only here. Worth adding to the PRD too for consistency, since STYLE.md is meant to be a distilled cheat-sheet, not the sole record.)
 
 ## Breakpoints
-- Mobile: ≤480px
-- Tablet: ≤768px
-- Desktop: 1024px+
+The CSS is mobile-first. These are the boundaries actually load-bearing in `style.css` — corrected here after an audit found the values below didn't match what an earlier draft of this section described (Mobile ≤480 / Tablet ≤768 / Desktop 1024+, a three-tier plan the code was never actually built against):
+- **769px** (`min-width`) — the one real mobile→tablet/desktop switch-over, used throughout for layout, typography and spacing. A handful of `max-width: 768px` blocks exist alongside it for the mobile-only side of the same boundary.
+- **1024px** (`min-width`) — desktop-only refinements layered on top of the 769px tier (a small number of rules).
+- **426px** (`min-width`) — one small-mobile-only refinement; not a general-purpose tier, don't reach for it by default.
+- **`hover: none`** — used instead of a width breakpoint to detect touch devices (restores the native cursor on touch, see Custom Cursor & Highlight above).
+
+If a genuine three-tier 480/768/1024 system is wanted going forward, that's a CSS refactor across every breakpoint in the file, not a doc correction — treat it as its own task with full visual re-verification against the reference images, not a drive-by change.
 
 ---
 **How to use this file:** Add `@STYLE.md` to your `CLAUDE.md` imports so it's loaded automatically every session. When prompting for a specific visual element, still explicitly tell Claude Code to open the referenced screenshot file directly (e.g. "read portfolio-website-PRD/Screenshot_2026-07-26_at_6.19.19_PM.png") — this file gives it the numbers, but the image gives it the actual shapes/composition.
