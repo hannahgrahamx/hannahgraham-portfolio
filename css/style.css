@@ -2870,22 +2870,22 @@ body.is-pressing #cursor-flower {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-}
-/* Per feedback: not a bright glow behind the text anymore — instead a
-   soft dark vignette, since the new holographic hero texture (see
-   .home-hero::before) competes with the text for attention, and a
-   darker scrim behind the copy reads as more legible than a brighter
-   halo on top of an already busy background. Moved to the FIRST child
-   in the markup (was 2nd, after .home-hero__heading-text) so it paints
-   behind the text by DOM order alone — it's aria-hidden either way, so
-   reordering doesn't touch the accessible reading order. No text
-   content anymore either: this is purely a background shape now, not a
-   gradient-clipped text duplicate. */
-.home-hero__heading-glow {
-  position: absolute;
-  inset: -15%;
-  pointer-events: none;
-  background: radial-gradient(ellipse 65% 75% at center, rgba(0, 0, 0, 0.6) 0%, transparent 70%);
+  /* Per feedback: the background vignette (a separate absolutely-
+     positioned layer) didn't read as the text itself glowing — replaced
+     with a two-layer text-shadow directly on the glyphs instead, the
+     standard "neon sign" technique: a small, tight, saturated pink glow
+     right at the letterforms' edges (reads as actual light coming off
+     the text) plus a much larger, very soft, dark shadow further out
+     (keeps the text legible against the busy holographic texture behind
+     it, same job the vignette was doing, just via a shadow instead of a
+     separate background shape). text-shadow traces the rendered glyph
+     outlines directly — it works fine here despite the transparent
+     background-clip:text fill above, since shadows are computed from
+     the glyphs' alpha, not their fill color. */
+  text-shadow:
+    0 0 4px rgba(253, 142, 189, 0.9),
+    0 0 14px rgba(253, 142, 189, 0.7),
+    0 0 70px rgba(0, 0, 0, 0.65);
 }
 
 /* Chromatic-aberration / RGB-split effect, per feedback (inspired by a
