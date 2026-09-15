@@ -2211,11 +2211,13 @@ body.is-pressing #cursor-flower {
   display: block;
   width: 100%;
   height: auto;
-  /* Real dimensions (1000x1500) — same reasoning as .phase-two-grid__video
-     above: without this, the preload="none" video collapses to the
-     browser's ~150px unloaded fallback height until it's scrolled into
-     view and starts loading. */
-  aspect-ratio: 2 / 3;
+  /* Real dimensions 1080x1352 (135:169) — updated when the Pinterest ad
+     video was replaced with a new file (was 1000x1500/2:3 before).
+     Reasoning otherwise unchanged from .phase-two-grid__video above:
+     without this, the preload="none" video collapses to the browser's
+     ~150px unloaded fallback height until it's scrolled into view and
+     starts loading. */
+  aspect-ratio: 135 / 169;
 }
 
 /* Reflection's closing statement reads larger than standard body copy —
