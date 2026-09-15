@@ -842,6 +842,20 @@ body.is-pressing #cursor-flower {
      (96px) per feedback, so no longer matching .stat-feature's --space-4
      elsewhere. */
   padding: var(--space-8) 0;
+  /* Fills the viewport like the site's other full-bleed dark sections
+     (.project-hero/.home-hero/etc.) — per feedback, this band should
+     expand to fill the screen, not the .cta-bar directly below it,
+     which stays content-hugging. Same header-height subtraction
+     technique as those sections (93px below 769px, 81px 769–1023px,
+     67px at 1024px+ — see the shared media-query tiers). min-height
+     (not height) so it can still grow past one viewport if the stat
+     cards' own content ever needs more room than that. flex+center
+     keeps the grid vertically centered in the extra space instead of
+     hugging the top with a dead gap below it. */
+  min-height: calc(100vh - 93px);
+  min-height: calc(100dvh - 93px);
+  display: flex;
+  align-items: center;
 }
 
 .about-stats__grid {
@@ -2696,6 +2710,31 @@ body.is-pressing #cursor-flower {
   text-align: center;
   overflow: hidden;
 }
+/* Holographic/oil-slick sheen over the grid background, per feedback —
+   scoped to .home-hero specifically (a ::before, not added to the
+   shared .bg-graph class), so it doesn't leak into the footer or other
+   pages' dark sections that also use "the graph" pattern. Reuses the
+   site's existing accent palette (same colors as .hero-gradient-layer's
+   locked-in conic sweep) rather than inventing new ones. color-dodge
+   against this near-black backdrop is what gives it the "oil catching
+   the light" look — saturated colors bloom brightly, true black stays
+   essentially untouched, unlike a flat overlay wash. ::before (not
+   ::after) so it paints first/furthest back: behind the heading, the
+   film-grain ::after, and the scanlines element, all of which come
+   later in DOM order — this is background ambiance, not a foreground
+   effect competing with the CRT layers on top of it. */
+.home-hero::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  opacity: 0.16;
+  mix-blend-mode: screen;
+  filter: blur(60px);
+  background: conic-gradient(from 0deg at 30% 35%,
+    #00E5FF, #FF007F, #FDAF04, #A2B445, #00E5FF
+  );
+}
 /* Film-grain texture, per feedback — an inline SVG feTurbulence noise
    tile (no image asset/JS needed) as a ::after, not ::before, so it
    paints on top of the heading/scroll-cue rather than behind them (an
@@ -2853,10 +2892,10 @@ body.is-pressing #cursor-flower {
   background-clip: text;
   color: transparent;
 }
-/* Ambient glow, always on — per feedback, this used to only flare up on
-   hover (a subtler resting state, blur(12px)/opacity 0.5, jumping to
-   this blurred-halo look only on interaction); now it's a constant
-   effect at what was previously the hover-only intensity. */
+/* Ambient glow — always on (per earlier feedback, this used to only
+   flare up on hover from a much subtler resting state), and now flares
+   further still on hover on top of that constant base — per feedback,
+   stronger blur/opacity than the always-on level. */
 .home-hero__heading-glow {
   position: absolute;
   inset: 0;
@@ -2864,6 +2903,11 @@ body.is-pressing #cursor-flower {
   mix-blend-mode: hard-light;
   filter: blur(28px);
   opacity: 0.85;
+  transition: filter 0.4s ease, opacity 0.4s ease;
+}
+.home-hero__heading:hover .home-hero__heading-glow {
+  filter: blur(40px);
+  opacity: 1;
 }
 
 /* Chromatic-aberration / RGB-split effect, per feedback (inspired by a
@@ -3398,6 +3442,10 @@ body.is-pressing #cursor-flower {
     min-height: calc(100vh - 81px);
     min-height: calc(100dvh - 81px);
   }
+  .about-stats {
+    min-height: calc(100vh - 81px);
+    min-height: calc(100dvh - 81px);
+  }
   .vertical-carousel {
     height: calc(100vh - 81px);
     height: calc(100dvh - 81px);
@@ -3524,6 +3572,10 @@ body.is-pressing #cursor-flower {
      (brand collapses to one row, just above); same reasoning as the
      769px tier, just a smaller pixel value. --- */
   .project-hero {
+    min-height: calc(100vh - 67px);
+    min-height: calc(100dvh - 67px);
+  }
+  .about-stats {
     min-height: calc(100vh - 67px);
     min-height: calc(100dvh - 67px);
   }
