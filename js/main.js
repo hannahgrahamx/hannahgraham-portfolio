@@ -486,4 +486,37 @@
       resizeTimer = setTimeout(build, 200);
     });
   });
+
+  /* --- Marquee hover/click pause: hovering OR clicking either row
+     pauses BOTH together, not just the one interacted with — per
+     feedback. Click is a separate, persistent toggle from hover: it
+     stays paused after the mouse leaves until clicked again, whereas
+     hover alone releases as soon as the mouse leaves either row. Both
+     states are tracked independently and OR'd together so releasing one
+     doesn't cut a pause still being held by the other. */
+  const marquees = Array.from(document.querySelectorAll('.marquee'));
+  if (marquees.length) {
+    let hoverPaused = false;
+    let clickPaused = false;
+
+    function updateMarqueePause() {
+      const paused = hoverPaused || clickPaused;
+      marquees.forEach((m) => m.classList.toggle('is-paused', paused));
+    }
+
+    marquees.forEach((m) => {
+      m.addEventListener('mouseenter', () => {
+        hoverPaused = true;
+        updateMarqueePause();
+      });
+      m.addEventListener('mouseleave', () => {
+        hoverPaused = false;
+        updateMarqueePause();
+      });
+      m.addEventListener('click', () => {
+        clickPaused = !clickPaused;
+        updateMarqueePause();
+      });
+    });
+  }
 })();

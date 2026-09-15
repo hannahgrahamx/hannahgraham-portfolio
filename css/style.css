@@ -2853,21 +2853,15 @@ body.is-pressing #cursor-flower {
   background-clip: text;
   color: transparent;
 }
-/* Ambient glow: small and subtle by default, per feedback. Flares up on
-   hover — the blurred-halo look from a glitch/glow reference image,
-   applied as an interaction rather than a constant effect — via a smooth
-   eased transition (not a snap or a stepped/choppy animation) on both
-   blur radius and opacity. */
+/* Ambient glow, always on — per feedback, this used to only flare up on
+   hover (a subtler resting state, blur(12px)/opacity 0.5, jumping to
+   this blurred-halo look only on interaction); now it's a constant
+   effect at what was previously the hover-only intensity. */
 .home-hero__heading-glow {
   position: absolute;
   inset: 0;
   pointer-events: none;
   mix-blend-mode: hard-light;
-  filter: blur(12px);
-  opacity: 0.5;
-  transition: filter 0.4s ease, opacity 0.4s ease;
-}
-.home-hero__heading:hover .home-hero__heading-glow {
   filter: blur(28px);
   opacity: 0.85;
 }
@@ -2946,7 +2940,7 @@ body.is-pressing #cursor-flower {
   display: flex;
   width: max-content;
   gap: var(--space-6);
-  animation: marquee-scroll 26s linear infinite; /* slowed slightly from 22s, per feedback */
+  animation: marquee-scroll 40s linear infinite; /* slowed further from 26s, per feedback */
 }
 /* Second row scrolls the opposite direction — reusing the same
    marquee-scroll keyframe (0% → -50%) via animation-direction:reverse
@@ -2968,9 +2962,13 @@ body.is-pressing #cursor-flower {
 .marquee--bold .marquee__track span {
   font-weight: 700;
 }
-/* Hover pauses the scroll, per feedback — hovering the section (not just
-   the track) so moving over any word, gap, or divider keeps it paused. */
-.marquee:hover .marquee__track {
+/* Hovering OR clicking either row pauses BOTH rows together, not just
+   the one interacted with — see main.js, which toggles this class on
+   both .marquee elements at once regardless of which one triggered it.
+   Click is a persistent toggle (stays paused after the mouse leaves,
+   independent of hover); hover alone releases as soon as the mouse
+   leaves either row. */
+.marquee.is-paused .marquee__track {
   animation-play-state: paused;
 }
 .marquee__track span {
