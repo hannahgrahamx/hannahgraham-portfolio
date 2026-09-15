@@ -842,20 +842,6 @@ body.is-pressing #cursor-flower {
      (96px) per feedback, so no longer matching .stat-feature's --space-4
      elsewhere. */
   padding: var(--space-8) 0;
-  /* Fills the viewport like the site's other full-bleed dark sections
-     (.project-hero/.home-hero/etc.) — per feedback, this band should
-     expand to fill the screen, not the .cta-bar directly below it,
-     which stays content-hugging. Same header-height subtraction
-     technique as those sections (93px below 769px, 81px 769–1023px,
-     67px at 1024px+ — see the shared media-query tiers). min-height
-     (not height) so it can still grow past one viewport if the stat
-     cards' own content ever needs more room than that. flex+center
-     keeps the grid vertically centered in the extra space instead of
-     hugging the top with a dead gap below it. */
-  min-height: calc(100vh - 93px);
-  min-height: calc(100dvh - 93px);
-  display: flex;
-  align-items: center;
 }
 
 .about-stats__grid {
@@ -2863,25 +2849,18 @@ body.is-pressing #cursor-flower {
    and "empathy") always fires at every size; these two are the only ones
    that toggle. */
 .home-hero__break { display: inline; }
-/* The real (accessible) text plus one soft glow duplicate share the same
-   gradient-clipped look — per feedback, brought back smaller/subtler
-   than the original spec (STYLE.md's old two-layer, 50px-blur recipe):
-   one layer, a modest 12px blur, moderate opacity, so it reads as a
-   gentle glow rather than a halo competing with the text or the
-   chromatic-aberration fringe below. */
-.home-hero__heading-text,
-.home-hero__heading-glow {
+/* The real (accessible) text — gradient-clipped, per the PRD's
+   dedicated gradient reference (Screenshot_2026-07-26_at_6.10.33_PM.png)
+   — the actual Figma gradient panel: #C6D4E1 46%, #FD8EBD 54%,
+   #BBC48F 66%, #FDA24B 99%, remapped proportionally onto 0–100% for a
+   linear sweep. Figma's gradient there is "Angular" (conic), but
+   reproducing that literally as a CSS conic-gradient centered near a
+   two-line, natural-wrap heading created a visible seam/swirl where the
+   two lines' angles diverge — a fixed-frame Figma export doesn't have
+   that problem, but live-wrapping HTML text does. Linear, at 90deg,
+   gives the same left-to-right color sequence without the artifact. */
+.home-hero__heading-text {
   display: block;
-  /* Exact colors/stops confirmed against the PRD's dedicated gradient
-     reference (Screenshot_2026-07-26_at_6.10.33_PM.png) — the actual
-     Figma gradient panel: #C6D4E1 46%, #FD8EBD 54%, #BBC48F 66%,
-     #FDA24B 99%, remapped proportionally onto 0–100% for a linear sweep.
-     Figma's gradient there is "Angular" (conic), but reproducing that
-     literally as a CSS conic-gradient centered near a two-line, natural-
-     wrap heading created a visible seam/swirl where the two lines' angles
-     diverge — a fixed-frame Figma export doesn't have that problem, but
-     live-wrapping HTML text does. Linear, at 90deg, gives the same left-
-     to-right color sequence without the artifact. */
   background: linear-gradient(90deg,
     #C6D4E1 0%, /* no matching token — this exact blue-grey is unique to this gradient's Figma stops */
     var(--color-pink-light) 15%,
@@ -2892,22 +2871,21 @@ body.is-pressing #cursor-flower {
   background-clip: text;
   color: transparent;
 }
-/* Ambient glow — always on (per earlier feedback, this used to only
-   flare up on hover from a much subtler resting state), and now flares
-   further still on hover on top of that constant base — per feedback,
-   stronger blur/opacity than the always-on level. */
+/* Per feedback: not a bright glow behind the text anymore — instead a
+   soft dark vignette, since the new holographic hero texture (see
+   .home-hero::before) competes with the text for attention, and a
+   darker scrim behind the copy reads as more legible than a brighter
+   halo on top of an already busy background. Moved to the FIRST child
+   in the markup (was 2nd, after .home-hero__heading-text) so it paints
+   behind the text by DOM order alone — it's aria-hidden either way, so
+   reordering doesn't touch the accessible reading order. No text
+   content anymore either: this is purely a background shape now, not a
+   gradient-clipped text duplicate. */
 .home-hero__heading-glow {
   position: absolute;
-  inset: 0;
+  inset: -15%;
   pointer-events: none;
-  mix-blend-mode: hard-light;
-  filter: blur(28px);
-  opacity: 0.85;
-  transition: filter 0.4s ease, opacity 0.4s ease;
-}
-.home-hero__heading:hover .home-hero__heading-glow {
-  filter: blur(40px);
-  opacity: 1;
+  background: radial-gradient(ellipse 65% 75% at center, rgba(0, 0, 0, 0.6) 0%, transparent 70%);
 }
 
 /* Chromatic-aberration / RGB-split effect, per feedback (inspired by a
@@ -3442,10 +3420,6 @@ body.is-pressing #cursor-flower {
     min-height: calc(100vh - 81px);
     min-height: calc(100dvh - 81px);
   }
-  .about-stats {
-    min-height: calc(100vh - 81px);
-    min-height: calc(100dvh - 81px);
-  }
   .vertical-carousel {
     height: calc(100vh - 81px);
     height: calc(100dvh - 81px);
@@ -3572,10 +3546,6 @@ body.is-pressing #cursor-flower {
      (brand collapses to one row, just above); same reasoning as the
      769px tier, just a smaller pixel value. --- */
   .project-hero {
-    min-height: calc(100vh - 67px);
-    min-height: calc(100dvh - 67px);
-  }
-  .about-stats {
     min-height: calc(100vh - 67px);
     min-height: calc(100dvh - 67px);
   }
