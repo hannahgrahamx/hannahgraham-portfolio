@@ -159,25 +159,65 @@
   }
 
   /* --- Lightbox: click (or keyboard-activate) a photo to view it large
-     at its natural ratio. #lightbox carries role="dialog"/aria-modal in
-     the markup; this wires up the matching behaviour — focus moves to
-     the close button on open, Tab is trapped inside the dialog (its only
-     focusable descendant is that same button), and focus returns to
-     whichever thumbnail opened it on close, so keyboard/screen-reader
-     users aren't dropped into the page behind it. */
+     at its natural ratio, with prev/next arrows to move through the
+     other images in the same gallery/section — not every image on the
+     page. A photo's "group" is every lightbox-eligible image sharing
+     its nearest gallery-container ancestor (one .project-gallery--trio,
+     one .photo-strip, all four slides of one .vertical-carousel, etc.);
+     an image with no such ancestor (a standalone .full-bleed-image, say)
+     is a group of one, and the arrows stay hidden for it.
+
+     #lightbox carries role="dialog"/aria-modal in the markup; this wires
+     up the matching behaviour — focus moves to the close button on
+     open, Tab is trapped among whichever of prev/close/next are
+     currently visible, and focus returns to whichever thumbnail opened
+     it on close, so keyboard/screen-reader users aren't dropped into
+     the page behind it. */
 
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightbox__img');
   const lightboxClose = document.getElementById('lightbox__close');
+  const lightboxPrev = document.getElementById('lightbox__prev');
+  const lightboxNext = document.getElementById('lightbox__next');
   let lightboxTrigger = null;
+  let lightboxGroup = [];
+  let lightboxIndex = -1;
 
-  function openLightbox(src, alt, trigger) {
+  const LIGHTBOX_IMG_SELECTOR = '.photo-strip img, .project-gallery img, .realworld-grid img, .stat-feature__image, .masonry-grid img, .text-media-trio img, .full-bleed-image, .vertical-carousel__content img, .phase-two-grid__stack img';
+  const LIGHTBOX_GROUP_ANCESTOR_SELECTOR = '.photo-strip, .project-gallery, .realworld-grid, .masonry-grid, .text-media-trio, .vertical-carousel, .phase-two-grid__stack';
+  const lightboxImages = Array.from(document.querySelectorAll(LIGHTBOX_IMG_SELECTOR));
+
+  function getLightboxGroup(img) {
+    const root = img.closest(LIGHTBOX_GROUP_ANCESTOR_SELECTOR);
+    if (!root) return [img];
+    const groupImgs = Array.from(root.querySelectorAll('img')).filter((candidate) => lightboxImages.includes(candidate));
+    return groupImgs.length ? groupImgs : [img];
+  }
+
+  function showLightboxImage(index) {
+    const img = lightboxGroup[index];
+    if (!img) return;
+    lightboxIndex = index;
+    lightboxImg.src = img.src;
+    lightboxImg.alt = img.alt || '';
+    const isMulti = lightboxGroup.length > 1;
+    if (lightboxPrev) lightboxPrev.hidden = !isMulti;
+    if (lightboxNext) lightboxNext.hidden = !isMulti;
+  }
+
+  function goToLightboxImage(delta) {
+    if (lightboxGroup.length < 2) return;
+    showLightboxImage((lightboxIndex + delta + lightboxGroup.length) % lightboxGroup.length);
+  }
+
+  function openLightbox(img) {
     if (!lightbox) return;
-    lightboxImg.src = src;
-    lightboxImg.alt = alt || '';
+    lightboxGroup = getLightboxGroup(img);
+    const index = lightboxGroup.indexOf(img);
+    showLightboxImage(index >= 0 ? index : 0);
     lightbox.classList.add('is-open');
     lightbox.setAttribute('aria-hidden', 'false');
-    lightboxTrigger = trigger || null;
+    lightboxTrigger = img;
     if (lightboxClose) lightboxClose.focus();
   }
 
@@ -188,38 +228,50 @@
     lightboxImg.src = '';
     if (lightboxTrigger) lightboxTrigger.focus();
     lightboxTrigger = null;
+    lightboxGroup = [];
+    lightboxIndex = -1;
   }
 
-  document.querySelectorAll('.photo-strip img, .project-gallery img, .realworld-grid img, .stat-feature__image, .masonry-grid img, .text-media-trio img, .full-bleed-image, .vertical-carousel__content img, .phase-two-grid__stack img').forEach((img) => {
+  lightboxImages.forEach((img) => {
     img.setAttribute('tabindex', '0');
     img.setAttribute('role', 'button');
     if (img.alt) img.setAttribute('aria-label', `${img.alt} — view larger`);
 
-    img.addEventListener('click', () => openLightbox(img.src, img.alt, img));
+    img.addEventListener('click', () => openLightbox(img));
     img.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        openLightbox(img.src, img.alt, img);
+        openLightbox(img);
       }
     });
   });
 
   if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+  if (lightboxPrev) lightboxPrev.addEventListener('click', () => goToLightboxImage(-1));
+  if (lightboxNext) lightboxNext.addEventListener('click', () => goToLightboxImage(1));
   if (lightbox) {
     lightbox.addEventListener('click', (e) => {
       if (e.target === lightbox) closeLightbox();
     });
-    // Only focusable descendant is the close button — Tab/Shift+Tab
-    // should simply keep focus there rather than escaping to the page.
+    // Tab is trapped among whichever of prev/close/next are currently
+    // visible (prev/next hide entirely for a single-image group) rather
+    // than escaping to the page behind the dialog.
     lightbox.addEventListener('keydown', (e) => {
-      if (e.key === 'Tab' && lightboxClose) {
-        e.preventDefault();
-        lightboxClose.focus();
-      }
+      if (e.key !== 'Tab') return;
+      const focusable = [lightboxPrev, lightboxClose, lightboxNext].filter((el) => el && !el.hidden);
+      if (!focusable.length) return;
+      e.preventDefault();
+      const current = focusable.indexOf(document.activeElement);
+      const dir = e.shiftKey ? -1 : 1;
+      const next = current === -1 ? 0 : (current + dir + focusable.length) % focusable.length;
+      focusable[next].focus();
     });
   }
   document.addEventListener('keydown', (e) => {
+    if (!lightbox || !lightbox.classList.contains('is-open')) return;
     if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') goToLightboxImage(-1);
+    if (e.key === 'ArrowRight') goToLightboxImage(1);
   });
 
   /* --- Shared carousel logic: arrows + dots + swipe, manual navigation

@@ -2125,21 +2125,10 @@ body.is-pressing #cursor-flower {
   .text-media-trio { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* "Phase two" band: heading + right-aligned "Continued" label, then a
-   video (left) with a stack of three supporting stills (right). */
+/* "Phase two" band: heading, then a video (left) with a stack of three
+   supporting stills (right). */
 .phase-band__header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-2);
   margin-bottom: var(--space-3);
-}
-.phase-band__label {
-  font-size: 0.875rem; /* Labels tier: 14px */
-  font-weight: 440;
-  text-transform: uppercase;
-  color: var(--color-green-dark);
-  flex-shrink: 0;
 }
 .phase-two-grid {
   display: grid;
@@ -2653,6 +2642,36 @@ body.is-pressing #cursor-flower {
   font-size: 1.5rem;
   color: var(--color-cream);
   cursor: none;
+}
+/* Prev/next — move through the other images in the same gallery/
+   section as the one that opened the lightbox (see main.js). Hidden
+   via [hidden] for a single-image group, same as any other optional
+   control on the site. */
+#lightbox__prev,
+#lightbox__next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  color: var(--color-cream);
+  cursor: none;
+  transition: color 0.18s ease;
+}
+#lightbox__prev svg,
+#lightbox__next svg { width: 100%; height: 100%; }
+#lightbox__prev:hover,
+#lightbox__next:hover { color: var(--color-pink-light); }
+#lightbox__prev { left: var(--space-3); }
+#lightbox__next { right: var(--space-3); }
+@media (max-width: 480px) {
+  #lightbox__prev,
+  #lightbox__next {
+    width: 36px;
+    height: 36px;
+  }
+  #lightbox__prev { left: var(--space-1); }
+  #lightbox__next { right: var(--space-1); }
 }
 
 /* =====================================================
