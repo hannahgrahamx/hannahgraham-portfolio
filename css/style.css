@@ -2849,18 +2849,25 @@ body.is-pressing #cursor-flower {
    and "empathy") always fires at every size; these two are the only ones
    that toggle. */
 .home-hero__break { display: inline; }
-/* The real (accessible) text — gradient-clipped, per the PRD's
-   dedicated gradient reference (Screenshot_2026-07-26_at_6.10.33_PM.png)
-   — the actual Figma gradient panel: #C6D4E1 46%, #FD8EBD 54%,
-   #BBC48F 66%, #FDA24B 99%, remapped proportionally onto 0–100% for a
-   linear sweep. Figma's gradient there is "Angular" (conic), but
-   reproducing that literally as a CSS conic-gradient centered near a
-   two-line, natural-wrap heading created a visible seam/swirl where the
-   two lines' angles diverge — a fixed-frame Figma export doesn't have
-   that problem, but live-wrapping HTML text does. Linear, at 90deg,
-   gives the same left-to-right color sequence without the artifact. */
-.home-hero__heading-text {
+/* The real (accessible) text plus one soft glow duplicate share the same
+   gradient-clipped look — per feedback, brought back smaller/subtler
+   than the original spec (STYLE.md's old two-layer, 50px-blur recipe):
+   one layer, a modest 12px blur, moderate opacity, so it reads as a
+   gentle glow rather than a halo competing with the text or the
+   chromatic-aberration fringe below. */
+.home-hero__heading-text,
+.home-hero__heading-glow {
   display: block;
+  /* Exact colors/stops confirmed against the PRD's dedicated gradient
+     reference (Screenshot_2026-07-26_at_6.10.33_PM.png) — the actual
+     Figma gradient panel: #C6D4E1 46%, #FD8EBD 54%, #BBC48F 66%,
+     #FDA24B 99%, remapped proportionally onto 0–100% for a linear sweep.
+     Figma's gradient there is "Angular" (conic), but reproducing that
+     literally as a CSS conic-gradient centered near a two-line, natural-
+     wrap heading created a visible seam/swirl where the two lines' angles
+     diverge — a fixed-frame Figma export doesn't have that problem, but
+     live-wrapping HTML text does. Linear, at 90deg, gives the same left-
+     to-right color sequence without the artifact. */
   background: linear-gradient(90deg,
     #C6D4E1 0%, /* no matching token — this exact blue-grey is unique to this gradient's Figma stops */
     var(--color-pink-light) 15%,
@@ -2870,22 +2877,23 @@ body.is-pressing #cursor-flower {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  /* Per feedback: the background vignette (a separate absolutely-
-     positioned layer) didn't read as the text itself glowing — replaced
-     with a two-layer text-shadow directly on the glyphs instead, the
-     standard "neon sign" technique: a small, tight, saturated pink glow
-     right at the letterforms' edges (reads as actual light coming off
-     the text) plus a much larger, very soft, dark shadow further out
-     (keeps the text legible against the busy holographic texture behind
-     it, same job the vignette was doing, just via a shadow instead of a
-     separate background shape). text-shadow traces the rendered glyph
-     outlines directly — it works fine here despite the transparent
-     background-clip:text fill above, since shadows are computed from
-     the glyphs' alpha, not their fill color. */
-  text-shadow:
-    0 0 4px rgba(253, 142, 189, 0.9),
-    0 0 14px rgba(253, 142, 189, 0.7),
-    0 0 70px rgba(0, 0, 0, 0.65);
+}
+/* Ambient glow — always on (per earlier feedback, this used to only
+   flare up on hover from a much subtler resting state), and now flares
+   further still on hover on top of that constant base — per feedback,
+   stronger blur/opacity than the always-on level. */
+.home-hero__heading-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: hard-light;
+  filter: blur(28px);
+  opacity: 0.85;
+  transition: filter 0.4s ease, opacity 0.4s ease;
+}
+.home-hero__heading:hover .home-hero__heading-glow {
+  filter: blur(40px);
+  opacity: 1;
 }
 
 /* Chromatic-aberration / RGB-split effect, per feedback (inspired by a
