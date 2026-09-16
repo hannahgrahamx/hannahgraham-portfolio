@@ -104,6 +104,8 @@
     const originalLabel = el.getAttribute('data-cursor-label') || 'Copy email';
 
     el.addEventListener('click', () => {
+      if (typeof gtag === 'function') gtag('event', 'copy_email');
+
       navigator.clipboard.writeText(EMAIL).then(() => {
         if (cursorContextInner) cursorContextInner.textContent = 'Copied!';
       }, () => {
@@ -117,6 +119,23 @@
           }
         }, 1500);
       });
+    });
+  });
+
+  /* --- Analytics: LinkedIn clicks + CV downloads ------------------
+     Both are plain links with no existing click handler (unlike
+     copy-email above, which already had one to hook into), so they
+     get gtag calls added directly on click. */
+
+  document.querySelectorAll('a[href*="linkedin.com"]').forEach((el) => {
+    el.addEventListener('click', () => {
+      if (typeof gtag === 'function') gtag('event', 'click_linkedin');
+    });
+  });
+
+  document.querySelectorAll('a[download]').forEach((el) => {
+    el.addEventListener('click', () => {
+      if (typeof gtag === 'function') gtag('event', 'download_cv');
     });
   });
 
