@@ -8,3 +8,4 @@
 # (all real site images live under assets/, not here)
 /dev-screenshots/
 .claude/worktrees/
+/portfolio-website-PRD/
