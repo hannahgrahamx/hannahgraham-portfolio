@@ -538,4 +538,73 @@
       });
     });
   }
+
+  /* --- Hero spotlight: the gradient glow behind the home heading is
+     only revealed in a soft circle around the cursor, per feedback. The
+     circle eases after the pointer (slight trailing lag) rather than
+     sitting exactly under it — instant for reduced-motion users. On
+     touch it follows the finger while pressed and hides on release;
+     touch events, not pointer events, because a pointer stream is
+     cancelled the moment the drag turns into a page scroll. */
+  const heroHeading = document.querySelector('.home-hero__heading');
+  const heroGlow = heroHeading ? heroHeading.querySelector('.home-hero__heading-glow') : null;
+  if (heroHeading && heroGlow) {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let targetX = 0, targetY = 0, spotX = 0, spotY = 0;
+    let spotRaf = null;
+    let isSpotlit = false;
+    let lastTouchTime = 0;
+
+    function renderSpot() {
+      const ease = reduceMotion.matches ? 1 : 0.12; // lower = longer trail
+      spotX += (targetX - spotX) * ease;
+      spotY += (targetY - spotY) * ease;
+      heroGlow.style.setProperty('--spot-x', spotX + 'px');
+      heroGlow.style.setProperty('--spot-y', spotY + 'px');
+
+      if (Math.abs(targetX - spotX) > 0.5 || Math.abs(targetY - spotY) > 0.5) {
+        spotRaf = requestAnimationFrame(renderSpot);
+      } else {
+        spotRaf = null;
+      }
+    }
+
+    function moveSpot(clientX, clientY) {
+      const rect = heroGlow.getBoundingClientRect();
+      targetX = clientX - rect.left;
+      targetY = clientY - rect.top;
+      // Start each new hover right under the pointer, so the light fades
+      // in where you are instead of sweeping over from where it last left.
+      if (!isSpotlit) {
+        spotX = targetX;
+        spotY = targetY;
+        isSpotlit = true;
+        heroHeading.classList.add('is-spotlit');
+      }
+      if (!spotRaf) spotRaf = requestAnimationFrame(renderSpot);
+    }
+
+    function hideSpot() {
+      isSpotlit = false;
+      heroHeading.classList.remove('is-spotlit');
+    }
+
+    heroHeading.addEventListener('mousemove', (e) => {
+      // Browsers fire a synthetic mousemove after a tap — ignore it, or
+      // the light would switch back on after the finger lifts.
+      if (Date.now() - lastTouchTime < 800) return;
+      moveSpot(e.clientX, e.clientY);
+    });
+    heroHeading.addEventListener('mouseleave', hideSpot);
+
+    function onTouch(e) {
+      lastTouchTime = Date.now();
+      const t = e.touches[0];
+      if (t) moveSpot(t.clientX, t.clientY);
+    }
+    heroHeading.addEventListener('touchstart', onTouch, { passive: true });
+    heroHeading.addEventListener('touchmove', onTouch, { passive: true });
+    heroHeading.addEventListener('touchend', () => { lastTouchTime = Date.now(); hideSpot(); });
+    heroHeading.addEventListener('touchcancel', () => { lastTouchTime = Date.now(); hideSpot(); });
+  }
 })();

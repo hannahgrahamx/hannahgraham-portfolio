@@ -2731,28 +2731,6 @@ body.is-pressing #cursor-flower {
   background-size: 260px 260px;
   animation: home-hero-grain 0.6s steps(4) infinite;
 }
-/* CRT scanlines + vignette, layered on a separate real element (not
-   folded into the grain ::after) so they stay static while the grain
-   above jitters — real scanlines don't drift, only the film grain does.
-   A plain last-child div, not another pseudo-element: ::after is always
-   painted last regardless of source order, so this only needs to come
-   after the heading/scroll-cue in the markup to sit above them, same
-   paint-order logic the grain ::after's own comment documents. Together
-   with the grid background already on this section, this is what reads
-   as 80s/90s CRT-tech rather than just "a dark hero with noise." */
-.home-hero__scanlines {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    repeating-linear-gradient(to bottom,
-      rgba(0, 0, 0, 0.28) 0px,
-      rgba(0, 0, 0, 0.28) 1px,
-      transparent 1px,
-      transparent 3px
-    ),
-    radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(0, 0, 0, 0.45) 100%);
-}
 /* Fixed px offsets, not % — % on a translate is relative to THIS
    element's own box (the full hero, 1000px+ tall), not the 260px noise
    tile, so what looked like a small jitter was actually shifting the
@@ -2816,7 +2794,7 @@ body.is-pressing #cursor-flower {
      any more; nothing to constrain now that line breaks are explicit. */
   font-size: clamp(4.25rem, 2.95rem + 5.546vw, 6.5rem);
   line-height: 1.15;
-  letter-spacing: -0.0417em; /* Hero tier: -3px at 72px, expressed as em, per STYLE.md */
+  letter-spacing: -0.03em; /* loosened slightly from the Hero tier's -0.0417em (-3px at 72px) per feedback, for legibility — see STYLE.md */
 }
 /* Explicit line-break control, decoupled from font-size — shown (mobile/
    tablet, 4-line layout) by default, hidden (desktop, 2-line layout) at
@@ -2853,21 +2831,28 @@ body.is-pressing #cursor-flower {
   background-clip: text;
   color: transparent;
 }
-/* Ambient glow — always on (per earlier feedback, this used to only
-   flare up on hover from a much subtler resting state), and now flares
-   further still on hover on top of that constant base — per feedback,
-   stronger blur/opacity than the always-on level. */
+/* Spotlight glow, per feedback — hidden at rest, and only revealed in a
+   soft ~250px circle that trails the cursor (or finger, on touch) while
+   over the heading. main.js sets --spot-x/--spot-y (relative to this
+   layer's own box) and toggles .is-spotlit on the heading. The layer is
+   oversized by 100px on every side (negative inset + matching padding,
+   so the text inside still lines up exactly with the real text): a mask
+   only covers its own element's box, so without the extra room the
+   blurred halo got clipped flat wherever it spilled past the heading. */
 .home-hero__heading-glow {
   position: absolute;
-  inset: 0;
+  inset: -100px;
+  padding: 100px;
+  background-origin: content-box; /* keep the gradient's stops spanning the text, not the extra padding */
   pointer-events: none;
   mix-blend-mode: hard-light;
   filter: blur(28px);
-  opacity: 0.85;
-  transition: filter 0.4s ease, opacity 0.4s ease;
+  opacity: 0;
+  -webkit-mask-image: radial-gradient(circle 125px at var(--spot-x, 50%) var(--spot-y, 50%), black 30%, transparent 100%);
+  mask-image: radial-gradient(circle 125px at var(--spot-x, 50%) var(--spot-y, 50%), black 30%, transparent 100%);
+  transition: opacity 0.3s ease-in-out;
 }
-.home-hero__heading:hover .home-hero__heading-glow {
-  filter: blur(40px);
+.home-hero__heading.is-spotlit .home-hero__heading-glow {
   opacity: 1;
 }
 
@@ -2877,8 +2862,7 @@ body.is-pressing #cursor-flower {
    technique as the glow layer above, but clipped to flat colours instead
    of the rainbow gradient (a true colour-channel split reads as solid
    fringes at the letter edges, not another gradient). Uses the site's
-   own palette (pink + yellow, both already gradient stops elsewhere on
-   this heading) rather than literal red/cyan. Static offset, no
+   own brand palette (pink + green) rather than literal red/cyan. Static offset, no
    animation — an earlier drifting version read as unwanted constant
    motion, per feedback ("don't like the movement"); the fringe itself
    stays, it just doesn't move. screen blend mode is what makes the
@@ -2904,12 +2888,26 @@ body.is-pressing #cursor-flower {
      getComputedStyle: backgroundClip came back "border-box"). */
   background-color: var(--color-pink);
   opacity: 0.75;
-  transform: translate(-4px, 2px);
+  transform: translate(-4px, 0); /* horizontal-only split, per feedback */
 }
-.home-hero__heading-glitch--yellow {
-  background-color: var(--color-yellow); /* background-color, not the shorthand — see .home-hero__heading-glitch--pink's comment */
+.home-hero__heading-glitch--green {
+  background-color: var(--color-green); /* brand green, per feedback (was yellow); background-color, not the shorthand — see .home-hero__heading-glitch--pink's comment */
   opacity: 0.75;
-  transform: translate(4px, -2px);
+  transform: translate(4px, 0);
+}
+/* Real text painted above the glow + glitch layers, per feedback (copy
+   needed to be more legible) — the absolutely-positioned duplicates
+   otherwise paint over it, blurring and washing out the letterforms. The
+   glitch fringe still shows where its offset pokes past the glyph edges.
+   Solid sand rather than the shared gradient, per feedback (cream was
+   tried first but read as pure white against the near-black hero) — the
+   glow layer keeps the gradient, so the colour now lives in the spotlight
+   halo and the fringe around light letterforms. */
+.home-hero__heading-text {
+  position: relative;
+  z-index: 1;
+  background: none;
+  color: var(--color-sand);
 }
 
 .home-hero__scroll-cue {
@@ -2939,7 +2937,7 @@ body.is-pressing #cursor-flower {
 .marquee {
   overflow: hidden;
   background: var(--color-pink); /* per feedback, was --color-green-light */
-  padding: 4px 0; /* 24px total band height, per feedback — 16px text (1rem @ line-height:1, see .marquee__track span below) + 4px top/bottom */
+  padding: 4px 0; /* 22px total band height — 14px text (0.875rem @ line-height:1, see .marquee__track span below) + 4px top/bottom */
 }
 .marquee__track {
   display: flex;
@@ -2961,12 +2959,6 @@ body.is-pressing #cursor-flower {
   animation-direction: reverse;
   animation-duration: 160s; /* significantly slower, per feedback — was 55s */
 }
-/* Bottom row is a single repeating word, always emphasized — every span
-   is bold, not just one "current" one, so this is a track-level modifier
-   rather than the old single-word .is-current class. */
-.marquee--bold .marquee__track span {
-  font-weight: 700;
-}
 /* Hovering OR clicking either row pauses BOTH rows together, not just
    the one interacted with — see main.js, which toggles this class on
    both .marquee elements at once regardless of which one triggered it.
@@ -2979,13 +2971,13 @@ body.is-pressing #cursor-flower {
 .marquee__track span {
   position: relative;
   font-family: var(--font-body);
-  font-size: 1rem;
+  /* Same type treatment as the project cards' labels (.project-card__caption p,
+     e.g. "AWARENESS CAMPAIGN"), per feedback — was the Eyebrow tier (16px,
+     600, +0.0625em), and the bottom "Design" row was bold on top of that. */
+  font-size: 0.875rem; /* Labels tier: 14px */
   line-height: 1; /* was the browser default (~1.4-1.5) — that alone was most of the old ~78px band height */
-  /* Eyebrow tier weight (600), per STYLE.md — was 500, an accidental
-     near-miss of Eyebrow given this already shares its 16px size and
-     0.0625em letter-spacing; simplified to match exactly, per feedback. */
-  font-weight: 600;
-  letter-spacing: 0.0625em;
+  font-weight: 440;
+  letter-spacing: -0.03rem; /* matches the labels exactly: they inherit body's -3% as an already-computed length (-0.48px, i.e. 3% of the 16px root), not re-scaled to their own 14px */
   text-transform: uppercase;
   color: var(--color-cream); /* light text, per feedback — was --color-forest */
   white-space: nowrap;
@@ -3123,6 +3115,16 @@ body.is-pressing #cursor-flower {
   text-transform: uppercase;
   color: var(--color-green-dark);
 }
+/* Tighter title/label spacing on the home page's cards, per feedback —
+   the caption was inheriting body copy's 30px line-height, and since the
+   h3 is inline its line box takes that taller strut rather than its own
+   line-height, leaving a loose gap above the label. */
+.project-scroller .project-card__caption {
+  line-height: 1.2;
+}
+.project-scroller .project-card__caption p {
+  line-height: 1.2;
+}
 
 /* --- 11d. About teaser — photo + copy sit side by side at EVERY
    breakpoint per the reference (not stacked-then-row); only the photo's
@@ -3141,26 +3143,54 @@ body.is-pressing #cursor-flower {
   gap: var(--space-3);
   text-align: left;
 }
+/* Hovering the photo flips it like a card to a second, personal photo
+   (professional on the front, personal on the back), and flips back when
+   the pointer leaves, per feedback. The :hover sits on this outer,
+   non-rotating box rather than the rotating .home-about-teaser__flip —
+   mid-flip the rotating card is edge-on and nearly zero-width, which
+   would drop the hover and make it flicker back. */
 .home-about-teaser__photo {
   flex-shrink: 0;
   width: 72px;
-  aspect-ratio: 1 / 1;
-  border-radius: 50%;
-  overflow: hidden;
-  /* Same offset-shadow language as the desktop version below (green
-     top-left, pink bottom-right, no blur) instead of the old concentric
-     ring — box-shadow follows border-radius automatically, so this
-     renders as two circular offset copies behind the photo, per
-     feedback. */
-  box-shadow:
-    -4px -4px 0 0 var(--color-green),
-     4px  4px 0 0 var(--color-pink);
+  perspective: 800px;
 }
-.home-about-teaser__photo img {
+.home-about-teaser__flip {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease-in-out;
+}
+.home-about-teaser__photo:hover .home-about-teaser__flip {
+  transform: rotateY(180deg);
+}
+.home-about-teaser__face {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  border-radius: 50%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  /* Same offset-shadow language as the desktop version below (green
+     top-left, pink bottom-right, no blur) instead of the old concentric
+     ring — box-shadow follows border-radius automatically, so this
+     renders as two circular offset copies behind the photo, per
+     feedback. On each face rather than the outer box, so the shadows
+     turn over with the card instead of hanging in place behind it. */
+  box-shadow:
+    -4px -4px 0 0 var(--color-green),
+     4px  4px 0 0 var(--color-pink);
+}
+/* Pre-rotated 180deg so it starts facing away; once the card itself turns
+   180deg the two rotations cancel out, so this face (photo and shadows)
+   reads the right way round with no mirroring needed. */
+.home-about-teaser__face--back {
+  transform: rotateY(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-about-teaser__flip { transition: none; }
 }
 .home-about-teaser__copy p {
   font-size: 1rem;
@@ -3339,10 +3369,9 @@ body.is-pressing #cursor-flower {
   }
   .home-about-teaser__photo {
     width: 220px;
-    aspect-ratio: auto;
+  }
+  .home-about-teaser__face {
     border-radius: 0;
-    overflow: visible;
-    border: none;
     box-shadow:
       -6px -6px 0 0 var(--color-green),
        6px  6px 0 0 var(--color-pink);

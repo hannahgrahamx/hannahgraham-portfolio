@@ -13,7 +13,7 @@ Both are Google Fonts — load via `<link>` CDN tag. No local files, no npm.
 ## Typography Scale
 | Style | Size | Weight/Font | Letter spacing | Line height |
 |---|---|---|---|---|
-| Hero | 72px | Bricolage Bold | -3px | 82px |
+| Hero | 72px | Bricolage Bold | -3px (home hero heading overridden to `-0.03em`, loosened per feedback) | 82px |
 | Heading 1 | 50px | Bricolage Bold | -3px | 50px |
 | Heading 2 | 40px | Bricolage Bold | -0.8px | — |
 | Heading 3 | 32px | Bricolage Semibold | -0.5px | — |
@@ -60,16 +60,19 @@ Define these as CSS custom properties in `:root` — never hardcode hex values i
 - Background it sits on: `#131412`
 
 ## Hero Text Gradient
-The home hero heading (index.html) uses one crisp gradient-clipped text
-layer — no glow/blur duplicates. An earlier version of this spec called
-for three stacked layers (normal blend + two blurred/blended duplicates
-at hard-light/color-dodge, 50px blur), matching the original PRD
-reference screenshots below. That layered-glow version was removed per
-feedback: it read as a colourful halo glowing outward from the text
-rather than gradient color living inside the letterforms, and it visually
-competed with the chromatic-aberration effect added alongside it (see
-`.home-hero__heading-glitch` in style.css). The gradient stops/colors
-themselves are unchanged, only the glow layers are gone.
+The home hero heading (index.html) is solid `--color-sand` text on top (cream read as pure white on the dark hero), over
+one soft gradient-clipped, blurred duplicate (`.home-hero__heading-glow`, 28px blur). The glow is
+hidden at rest and only revealed as a "spotlight": a soft ~250px circle (CSS
+mask, positioned by main.js) that trails the cursor with a slight lag, or
+follows the finger while touching on mobile. An earlier version of this spec called for three stacked layers
+(normal blend + two blurred/blended duplicates at hard-light/color-dodge, 50px
+blur), matching the original PRD reference screenshots below. That version was
+removed per feedback: it read as a colourful halo glowing outward from the text
+rather than gradient color living inside the letterforms. On top of those sit
+two chromatic-aberration "glitch" duplicates (`.home-hero__heading-glitch`, `--color-pink`
+offset 4px left and `--color-green` offset 4px right, no vertical offset, 75%
+opacity, screen blend). CRT scanlines were tried over the hero
+and removed per feedback. The gradient stops/colors themselves are unchanged.
 
 **Original glow-layer reference (superseded, kept for history):**
 `portfolio-website-PRD/Screenshot_2026-07-26_at_6.10.54_PM.png` and

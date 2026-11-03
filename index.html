@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="/css/style.css?v=171">
+  <link rel="stylesheet" href="/css/style.css?v=172">
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-DXP7KQ58ZQ"></script>
@@ -97,25 +97,24 @@
         <span class="home-hero__heading-text">design <br class="home-hero__break">without<br>empathy is <br class="home-hero__break">decoration</span>
         <span class="home-hero__heading-glow" aria-hidden="true">design <br class="home-hero__break">without<br>empathy is <br class="home-hero__break">decoration</span>
         <span class="home-hero__heading-glitch home-hero__heading-glitch--pink" aria-hidden="true">design <br class="home-hero__break">without<br>empathy is <br class="home-hero__break">decoration</span>
-        <span class="home-hero__heading-glitch home-hero__heading-glitch--yellow" aria-hidden="true">design <br class="home-hero__break">without<br>empathy is <br class="home-hero__break">decoration</span>
+        <span class="home-hero__heading-glitch home-hero__heading-glitch--green" aria-hidden="true">design <br class="home-hero__break">without<br>empathy is <br class="home-hero__break">decoration</span>
       </h1>
       <span class="home-hero__scroll-cue" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
       </span>
-      <div class="home-hero__scanlines" aria-hidden="true"></div>
     </section>
 
     <!-- Discipline marquee — JS duplicates each of these one-set tracks
          enough times to guarantee no gap at the loop point regardless of
          viewport width, see main.js. Two rows, opposite scroll direction:
          the top row cycles the other disciplines, the bottom row is a
-         single repeating "Design" (bold), per feedback. -->
+         single repeating "Design", per feedback. -->
     <div class="marquee" aria-hidden="true">
       <div class="marquee__track">
         <span>Graphic</span><span>Product</span><span>Motion</span>
       </div>
     </div>
-    <div class="marquee marquee--reverse marquee--bold" aria-hidden="true">
+    <div class="marquee marquee--reverse" aria-hidden="true">
       <div class="marquee__track">
         <span>Design</span>
       </div>
@@ -151,7 +150,7 @@
         </a>
 
         <a class="project-card" href="/pages/myhealthnb-launch.html" data-cursor-label="View project">
-          <img src="/assets/myhealthnb-launch/tv-launch1.jpg" alt="TV mockup of the MyHealthNB launch film reading 'Putting health care in your hands', on a teal background.">
+          <img src="/assets/myhealthnb-launch/myhealthnb-cover.jpg" alt="TV mockup showing the MyHealthNB app on two phones beside the line 'Putting health care in your hands', on a textured dark green background.">
           <div class="project-card__caption">
             <h3>MyHealthNB Launch</h3>
             <p>Launch Campaign</p>
@@ -170,8 +169,13 @@
 
     <!-- About teaser -->
     <section class="home-about-teaser">
+      <!-- Hover flips the photo to a personal side, per feedback — see
+           .home-about-teaser__flip in style.css. -->
       <div class="home-about-teaser__photo">
-        <img src="/assets/headshot1.jpg" alt="Headshot of the designer, Hannah Graham. She is laughing, resting her chin on her hand, against a blurred green painted background.">
+        <div class="home-about-teaser__flip">
+          <img class="home-about-teaser__face" src="/assets/headshot1.jpg" alt="Headshot of the designer, Hannah Graham. She is laughing, resting her chin on her hand, against a blurred green painted background.">
+          <img class="home-about-teaser__face home-about-teaser__face--back" src="/assets/storr.webp" alt="Hannah smiling on a hiking trail beneath the rocky cliffs of the Old Man of Storr, Isle of Skye, Scotland." loading="lazy">
+        </div>
       </div>
       <div class="home-about-teaser__copy">
         <p>My career started with an early childhood obsession with abstract macrophotography. I bring that same hyper-focus to every project.</p>
@@ -207,6 +211,6 @@
     <img id="lightbox__img" src="" alt="">
   </div>
 
-  <script src="/js/main.js?v=27"></script>
+  <script src="/js/main.js?v=28"></script>
 </body>
 </html>
